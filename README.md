@@ -4,10 +4,10 @@
 
 # Getting started
 
-1. `npx create-react-app my-app`
-2. `cd my-app`
-3. `npm install axios`
-4. `npm install react-router-dom`
+1. `npm install` 
+2. `npm start`
+
+This should start the development server. Make changes and save to hot-reload the page.
 
 # Possible Errors
 
