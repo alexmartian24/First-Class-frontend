@@ -46,10 +46,12 @@ button:hover {
 }
 
 .error-message {
-  border: 2px solid var(--buff);
-  padding: 1em;
-  margin: 1em 0;
+  color: red;
+  font-weight: bold;
+  background: #ffeeee;
+  padding: 10px;
   border-radius: 5px;
+  text-align: center;
 }
 
 form input {
