@@ -8,9 +8,9 @@ import {
 
 import './App.css';
 
-import Navbar from './Components/Navbar/Navbar';  
-import People from './Components/People/People'; 
-import Home from './Components/Home';
+import Navbar from './Components/Navbar/Navbar.jsx'; 
+import People from './Components/People/People.jsx';  
+import Home from './Components/Home';  
 
 
 function PersonPage() {
