@@ -8,8 +8,10 @@ import {
 
 import './App.css';
 
-import Navbar from './Components/Navbar';
-import People from './Components/People';
+import Navbar from './Components/Navbar/Navbar';  
+import People from './Components/People/People'; 
+import Home from './Components/Home';
+
 
 function PersonPage() {
   const { name } = useParams();
@@ -23,6 +25,7 @@ function App() {
       <Routes>
         {/* For a different home page, do:
          <Route index element={<Login />} /> */}
+        <Route path="/" element={<Home />} />
         <Route path="people" element={<People />} />
         <Route path="people/:name" element={<PersonPage />} />
       </Routes>
