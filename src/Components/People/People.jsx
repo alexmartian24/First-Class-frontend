@@ -139,13 +139,14 @@ function People() {
           Add a Person
         </button>
       </header>
+      {error && <div className="error-message">{error}</div>}
+
       <AddPersonForm
         visible={addingPerson}
         cancel={hideAddPersonForm}
         fetchPeople={fetchPeople}
         setError={setError}
       />
-      {error && <ErrorMessage message={error} />}
       {people.map((person) => <Person key={person.email} person={person} />)}
     </div>
   );
