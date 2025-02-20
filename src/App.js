@@ -8,14 +8,15 @@ import {
 
 import './App.css';
 
-import Navbar from './Components/Navbar/Navbar';  
-import People from './Components/People/People'; 
+import Navbar from './Components/Navbar';  
+import People from './Components/People'; 
+import Submissions from './Components/Submissions/Submissions'
 import Home from './Components/Home';
 
 
 function PersonPage() {
-  const { name } = useParams();
-  return <h1>{name}</h1>
+  const { email } = useParams();
+  return <h1>{email}</h1>
 }
 
 function App() {
@@ -23,11 +24,11 @@ function App() {
     <BrowserRouter>
       <Navbar />
       <Routes>
-        {/* For a different home page, do:
-         <Route index element={<Login />} /> */}
+         {/* <Route index element={ <h1>Journal</h1> } /> */}
         <Route path="/" element={<Home />} />
         <Route path="people" element={<People />} />
-        <Route path="people/:name" element={<PersonPage />} />
+        <Route path="people/:email" element={<PersonPage />} />
+        <Route path="submissions" element={<Submissions />} />
       </Routes>
     </BrowserRouter>
   );
