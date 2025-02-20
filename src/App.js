@@ -9,7 +9,8 @@ import {
 import './App.css';
 
 import Navbar from './Components/Navbar/Navbar.jsx'; 
-import People from './Components/People/People.jsx';  
+import People from './Components/People/People.jsx';
+import Dashboard from './Components/Dashboard/Dashboard.jsx';
 import Home from './Components/Home';  
 
 
@@ -28,6 +29,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="people" element={<People />} />
         <Route path="people/:name" element={<PersonPage />} />
+        <Route path="dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
   );
