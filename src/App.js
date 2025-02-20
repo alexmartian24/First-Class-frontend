@@ -11,7 +11,7 @@ import './App.css';
 
 import Navbar from './Components/Navbar/Navbar.jsx'; 
 import People from './Components/People/People.jsx';
-import Submissions from './Components/Submissions/Submissions'
+import Submissions from './Components/Submissions/Submissions.jsx'
 import Dashboard from './Components/Dashboard/Dashboard.jsx';
 import Home from './Components/Home';
 
