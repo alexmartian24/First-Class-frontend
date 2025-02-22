@@ -32,7 +32,7 @@ function AddPersonForm({
       affiliation: affiliation,
       role: role,
     }
-    axios.put(PEOPLE_CREATE_ENDPOINT, newPerson)
+    axios.post(PEOPLE_CREATE_ENDPOINT, newPerson)
       .then(fetchPeople)
       .catch((error) => { setError(`There was a problem adding the person. ${error}`); });
   };
@@ -107,6 +107,7 @@ Person.propTypes = {
 };
 
 function peopleObjectToArray(Data) {
+  if (!Data) return [];
   return Object.entries(Data).map(([email, person]) => ({
     ...person,
     email: email // ensure email is included since it's the key
@@ -116,14 +117,19 @@ function peopleObjectToArray(Data) {
 function People() {
   const [error, setError] = useState('');
   const [people, setPeople] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [addingPerson, setAddingPerson] = useState(false);
 
   const fetchPeople = () => {
+    setLoading(true);
     axios.get(PEOPLE_READ_ENDPOINT)
-      .then(({ data }) => { setPeople(peopleObjectToArray(data)) })
-      .catch((error) => setError(`There was a problem retrieving the list of people. ${error}`));
+      .then(({ data }) => {
+        setPeople(peopleObjectToArray(data));
+      })
+      .catch((error) => setError(`There was a problem retrieving the list of people. ${error}`))
+      .finally(() => setLoading(false));
   };
-
+  useEffect(fetchPeople, []);
   const showAddPersonForm = () => { setAddingPerson(true); };
   const hideAddPersonForm = () => { setAddingPerson(false); };
 
@@ -132,22 +138,21 @@ function People() {
   return (
     <div className="wrapper">
       <header>
-        <h1>
-          View All People
-        </h1>
-        <button type="button" onClick={showAddPersonForm}>
-          Add a Person
-        </button>
+        <h1>View All People</h1>
+        <button type="button" onClick={() => setAddingPerson(true)}>Add a Person</button>
       </header>
+
       {error && <div className="error-message">{error}</div>}
+      {loading ? <p>Loading...</p> : null}
 
       <AddPersonForm
         visible={addingPerson}
-        cancel={hideAddPersonForm}
+        cancel={() => setAddingPerson(false)}
         fetchPeople={fetchPeople}
         setError={setError}
       />
-      {people.map((person) => <Person key={person.email} person={person} />)}
+
+      {!loading && people.map((person) => <Person key={person.email} person={person} />)}
     </div>
   );
 }
