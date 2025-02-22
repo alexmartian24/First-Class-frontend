@@ -23,7 +23,7 @@ function CreateManuscriptForm({
             author: author,
         };
     
-    axios.put(CREATE_MANUSCRIPT_ENDPOINT, manuscriptData)
+    axios.post(CREATE_MANUSCRIPT_ENDPOINT, manuscriptData)
         .then((response) => {
             console.log('Manuscript created:', response.data);
             setTitle('');
@@ -104,6 +104,10 @@ function ManuscriptActionForm({
 
     const submitAction = (event) => {
         event.preventDefault();
+        if (!manuscriptId.trim()) {
+            setError("Manuscript ID is required.");
+            return;
+        }
     const actionData = {
         _id: manuscriptId,
         curr_state: currentState,
