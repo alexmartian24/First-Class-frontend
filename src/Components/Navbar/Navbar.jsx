@@ -16,6 +16,7 @@ function NavLink({ page }) {
     </li>
   );
 }
+
 NavLink.propTypes = {
   page: propTypes.shape({
     label: propTypes.string.isRequired,
@@ -25,9 +26,11 @@ NavLink.propTypes = {
 
 function Navbar() {
   return (
-    <nav>
-      <ul className="wrapper">
-        {PAGES.map((page) => <NavLink key={page.destination} page={page} />)}
+    <nav style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <ul style={{ display: 'flex', listStyle: 'none', padding: 0, margin: 0, gap: '20px' }}>
+        {PAGES.map((page) => (
+          <NavLink key={page.destination} page={page} />
+        ))}
       </ul>
     </nav>
   );
