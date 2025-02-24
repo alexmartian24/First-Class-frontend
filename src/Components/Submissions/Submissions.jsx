@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 import propTypes from 'prop-types';
 import { BACKEND_URL } from '../../constants';
@@ -21,12 +22,12 @@ function Submissions({ submission }) {
 
 export default Submissions;
 
-// Submission.propTypes = {
-//   submission: propTypes.shape({
-//     title: propTypes.string,
-//     body: propTypes.string,
-//   }).isRequired,
-// };
+Submissions.propTypes = {
+  submission: PropTypes.shape({
+    title: PropTypes.string,
+    body: PropTypes.string,
+  }).isRequired,
+};
 
 // // Add a new submission.
 // function AddSubmissionForm({
