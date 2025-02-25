@@ -89,12 +89,12 @@ function ManuscriptActionForm({
     const [referee, setReferee] = useState('');
 
     const stateTransitions = {
-        SUB: ["REJ", "REV", "WIT"],  // Submitted -> Rejected, Review, Withdrawn
-        REV: ["REJ", "AUR"],         // Review -> Rejected, Author Revisions
-        AUR: ["REV"],                // Author Revisions -> Review
-        CED: ["REV"],                // Copy Edit -> Review
-        WIT: [],                     // Withdrawn -> No transitions
-        REJ: [],                     // Rejected -> No transitions
+        SUB: ["Reject", "Review", "Withdraw"],      // Submitted -> Rejected, Review, Withdrawn
+        REV: ["Reject", "Author Revisions"],        // Review -> Rejected, Author Revisions
+        AUR: ["Review"],                            // Author Revisions -> Review
+        CED: ["Review"],                            // Copy Edit -> Review
+        WIT: ["No actions available"],              // Withdrawn -> No transitions
+        REJ: ["No actions available"],              // Rejected -> No transitions
     };
 
     const changeManuscriptId = (event) => { setManuscriptId(event.target.value); };
@@ -161,7 +161,7 @@ function ManuscriptActionForm({
             onChange={changeCurrentState}
         >
             <option value="SUB">Submitted</option>
-            <option value="REV">Review</option>
+            <option value="REV">Under Review</option>
             <option value="AUR">Author Revision</option>
             <option value="CED">Copy Edit</option>
             <option value="WIT">Withdrawn</option>
