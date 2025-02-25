@@ -1,8 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
-import propTypes from 'prop-types';
-import { BACKEND_URL } from '../../constants';
 
 // const SUBMISSIONS_READ_ENDPOINT = `${BACKEND_URL}/submissions`;
 // const SUBMISSIONS_CREATE_ENDPOINT = `${BACKEND_URL}/submissions/create`;

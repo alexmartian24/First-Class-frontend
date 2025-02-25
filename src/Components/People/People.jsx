@@ -130,9 +130,6 @@ function People() {
       .finally(() => setLoading(false));
   };
   useEffect(fetchPeople, []);
-  const showAddPersonForm = () => { setAddingPerson(true); };
-  const hideAddPersonForm = () => { setAddingPerson(false); };
-
   useEffect(fetchPeople, []);
 
   return (
