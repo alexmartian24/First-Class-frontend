@@ -7,6 +7,7 @@ const PAGES = [
   { label: 'About', destination: '/about' },
   { label: 'View All People', destination: '/people' },
   { label: 'View All Submissions', destination: '/dashboard' },
+  { label: 'Settings', destination: '/settings' },
 ];
 
 function NavLink({ page }) {
