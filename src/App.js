@@ -14,6 +14,7 @@ import People from './Components/People/People.jsx';
 import Submissions from './Components/Submissions/Submissions.jsx'
 import Dashboard from './Components/Dashboard/Dashboard.jsx';
 import Home from './Components/Home';
+import About from './Components/About';
 
 
 function PersonPage() {
@@ -32,6 +33,7 @@ function App() {
         <Route path="people/:email" element={<PersonPage />} />
         <Route path="submissions" element={<Submissions />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path= "about" element={<About />} />
       </Routes>
     </BrowserRouter>
   );
