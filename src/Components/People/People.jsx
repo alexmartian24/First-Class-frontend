@@ -23,7 +23,7 @@ function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
 
     const newPerson = { name, email, affiliation, role };
 
-    axios.post(PEOPLE_CREATE_ENDPOINT, newPerson)
+    axios.put(PEOPLE_CREATE_ENDPOINT, newPerson)
       .then(() => {
         fetchPeople();
         setName('');
