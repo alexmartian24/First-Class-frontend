@@ -23,7 +23,7 @@ function CreateManuscriptForm({
             author: author,
         };
     
-    axios.post(CREATE_MANUSCRIPT_ENDPOINT, manuscriptData)
+    axios.put(CREATE_MANUSCRIPT_ENDPOINT, manuscriptData)
         .then((response) => {
             console.log('Manuscript created:', response.data);
             setTitle('');
@@ -89,10 +89,11 @@ function ManuscriptActionForm({
     const [referee, setReferee] = useState('');
 
     const stateTransitions = {
-        SUB: ["Reject", "Review", "Withdraw"],      // Submitted -> Rejected, Review, Withdrawn
-        REV: ["Reject", "Author Revisions"],        // Review -> Rejected, Author Revisions
-        AUR: ["Review"],                            // Author Revisions -> Review
-        CED: ["Review"],                            // Copy Edit -> Review
+        //keep in this format so backend recognizes it
+        SUB: ["REJ", "REV", "WIT"],      // Submitted -> Rejected, Review, Withdrawn
+        REV: ["REJ", "AUR"],        // Review -> Rejected, Author Revisions
+        AUR: ["REV"],                            // Author Revisions -> Review
+        CED: ["REV"],                            // Copy Edit -> Review
         WIT: ["No actions available"],              // Withdrawn -> No transitions
         REJ: ["No actions available"],              // Rejected -> No transitions
     };
@@ -109,7 +110,7 @@ function ManuscriptActionForm({
             return;
         }
     const actionData = {
-        _id: manuscriptId,
+        manu_id: manuscriptId,
         curr_state: currentState,
         action: action,
         referee: referee || undefined,
