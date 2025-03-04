@@ -23,16 +23,21 @@ function CreateManuscriptForm({
             author: author,
         };
     
-    axios.put(CREATE_MANUSCRIPT_ENDPOINT, manuscriptData)
-        .then((response) => {
-            console.log('Manuscript created:', response.data);
-            setTitle('');
-            setAuthor('');
+axios.put(CREATE_MANUSCRIPT_ENDPOINT, manuscriptData)
+    .then((response) => {
+        console.log('✅ Manuscript created successfully:', response.data);
+        setTitle('');
+        setAuthor('');
         if (onSuccess) onSuccess(response.data.Return);
-        })
-        .catch((error) => {
-        setError(`Failed to create manuscript: ${error.response?.data?.message || error.message}`);
-        });
+    })
+    .catch((error) => {
+        if (!error.response) {
+            setError("❌ Network error: Failed to reach server. Check your connection.");
+        } else {
+            setError(`❌ API error: ${error.response.data.message || "Unknown error occurred"}`);
+        }
+        console.error("API Error Details:", error);
+    });
     };
 
     if (!visible) return null;
