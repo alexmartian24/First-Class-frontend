@@ -48,8 +48,22 @@ function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
       <input required type="text" id="affiliation" value={affiliation} onChange={(e) => setAffiliation(e.target.value)} />
 
       <label htmlFor="role">Role</label>
-      <input required type="text" id="role" value={role} onChange={(e) => setRole(e.target.value)} />
-
+      <select
+        required
+        id="role"
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+      >
+        <option value="">Select a role</option>
+        <option value="Author">Author</option>
+        <option value="Consulting Editor">Consulting Editor</option>
+        <option value="Copy Editor">Copy Editor</option>
+        <option value="Editor">Editor</option>
+        <option value="Managing Editor">Managing Editor</option>
+        <option value="Referee">Referee</option>
+        <option value="Typesetter">Typesetter</option>
+      </select>
+      
       <div className="form-buttons">
         <button type="button" onClick={cancel}>Cancel</button>
         <button type="submit">Submit</button>

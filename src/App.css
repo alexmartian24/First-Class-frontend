@@ -63,7 +63,7 @@ form input {
   font-size: 1rem;
 }
 
-form label {
+/* form label {
   margin-left: 1rem;
   display: block;
   height: 0;
@@ -83,6 +83,13 @@ form label::after {
   border-radius: 5px;
   background-color: white;
   z-index: -1;
+} */
+
+form label {
+  display: block;
+  margin: 0.5rem 0 0.5rem 0;
+  font-weight: bold;
+  color: var(--accent-color);
 }
 
 form button {
