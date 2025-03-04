@@ -59,8 +59,40 @@ form input {
   margin: .5rem 0 1rem 0;
   padding: 1rem 0.5rem 0.5rem 0.5rem;
   border-radius: 5px;
-  border: 2px solid var(--accent-color);
+  border: 1px solid var(--accent-color);
   font-size: 1rem;
+}
+
+input[type="text"], select {
+  width: 100%;   /* Ensures the input fields take the full width */
+  padding: 8px;
+  box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Match the email field to other inputs */
+form input[type="email"] {
+  width: 100%;   /* Ensures the input fields take the full width */
+  padding: 8px;
+  box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+/* Override Chrome's green border for valid email */
+form input[type="email"]:valid,
+form input[type="email"]:invalid {
+  box-shadow: none; /* remove the colored glow */
+  border: 1px solid #ccc; /* match your other fields */
+}
+
+form select {
+  width: 100%;   /* Ensures the input fields take the full width */
+  padding: 8px;
+  box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem; /* match your input font-size */
 }
 
 /* form label {
