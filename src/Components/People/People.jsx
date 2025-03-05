@@ -7,6 +7,7 @@ import { BACKEND_URL } from '../../constants';
 
 const PEOPLE_READ_ENDPOINT = `${BACKEND_URL}/people`;
 const PEOPLE_CREATE_ENDPOINT = `${BACKEND_URL}/people/create`;
+const PEOPLE_DELETE_ENDPOINT = (email) => `${BACKEND_URL}/people/${encodeURIComponent(email)}`;
 
 function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
   const [name, setName] = useState('');
@@ -88,8 +89,18 @@ ErrorMessage.propTypes = {
   message: PropTypes.string,
 };
 
-function Person({ person }) {
+function Person({ person, fetchPeople, setError }) {
   const { name, email, affiliation, roles } = person;
+
+  const handleDelete = () => {
+    if (window.confirm(`Are you sure you want to delete ${name || email}?`)) {
+      axios.delete(PEOPLE_DELETE_ENDPOINT(email))
+        .then(() => {
+          fetchPeople();
+        })
+        .catch((error) => setError(`Failed to delete person: ${error.message}`));
+    }
+  };
 
   return (
     <div className="person-container">
@@ -103,6 +114,7 @@ function Person({ person }) {
       <p>Email: {email}</p>
       {affiliation && <p>Affiliation: {affiliation}</p>}
       {roles && roles.length > 0 && <p>Roles: {roles.join(', ')}</p>}
+      <button type="button" onClick={handleDelete} className="delete-button">Delete</button>
     </div>
   );
 }
@@ -114,6 +126,8 @@ Person.propTypes = {
     affiliation: PropTypes.string,
     roles: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
+  fetchPeople: PropTypes.func.isRequired,
+  setError: PropTypes.func.isRequired,
 };
 
 function peopleObjectToArray(data) {
@@ -156,7 +170,12 @@ function People() {
             setError={setError}
           />
           {people.map((person) => (
-            <Person key={person.email} person={person} />
+            <Person 
+              key={person.email} 
+              person={person} 
+              fetchPeople={fetchPeople}
+              setError={setError}
+            />
           ))}
         </>
       )}
