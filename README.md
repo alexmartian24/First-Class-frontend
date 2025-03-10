@@ -47,3 +47,9 @@ Use axios to send a GET request. Render the response in the browser.
 # Creating the Add Person button
 
 Use axios to send a POST request.
+
+# Creating the Edit Person button
+
+# Creating the Delete Person button
+
+#

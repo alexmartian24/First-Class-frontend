@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import propTypes from 'prop-types';
 import axios from 'axios';
 import './Dashboard.css';
@@ -6,7 +6,8 @@ import './Dashboard.css';
 import { BACKEND_URL } from '../../constants';
 const RECEIVE_ACTION_ENDPOINT = `${BACKEND_URL}/manuscripts/receive_action`;
 const CREATE_MANUSCRIPT_ENDPOINT = `${BACKEND_URL}/manuscripts/create`;
-
+const FETCH_MANUSCRIPT_ENDPOINT =  `${BACKEND_URL}/manuscripts`;
+ 
 function CreateManuscriptForm({
     visible,
     cancel,
@@ -227,6 +228,16 @@ function Dashboard() {
     const [showActionForm, setShowActionForm] = useState(false);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [manuscriptId, setManuscriptId] = useState('');
+    const [manuscripts, setManuscripts] = useState([]);
+
+
+    const fetchManuscript = () => {
+        axios.get(FETCH_MANUSCRIPT_ENDPOINT)
+        .then(({ data }) => {
+            setManuscripts(data);
+        })
+        .catch((error) => setError(`Failed to retrieve manuscripts: ${error.message}`))
+    };
 
     const toggleActionForm = () => {
         setShowActionForm(!showActionForm);
@@ -244,8 +255,13 @@ function Dashboard() {
         if (newManuscriptId) {
             setManuscriptId(newManuscriptId);
         }
+        fetchManuscript();
         setShowActionForm(true);
     };
+
+    useEffect(() => {
+        fetchManuscript();
+    }, []);
 
     return (
         <div className="dashboard-container">
@@ -275,6 +291,29 @@ function Dashboard() {
                 manuscriptId={manuscriptId}
                 setManuscriptId={setManuscriptId}
             />
+            <div className="manuscripts-list">
+                <h2>All Manuscripts</h2>
+                <table className="manuscripts-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>State</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {manuscripts.map((manuscript) => (
+                            <tr key={manuscript.manu_id}>
+                                <td>{manuscript.manu_id}</td>
+                                <td>{manuscript.title}</td>
+                                <td>{manuscript.author}</td>
+                                <td>{manuscript.curr_state}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
