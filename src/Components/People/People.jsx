@@ -195,19 +195,24 @@ function Person({ person, fetchPeople, setError, onEdit }) {
 
   return (
     <div className="person-container">
-      {name ? (
-        <Link to={`/people/${encodeURIComponent(email)}`}>
-          <h2>{name}</h2>
-        </Link>
-      ) : (
-        <h2>Unnamed Person</h2>
-      )}
-      <p>Email: {email}</p>
-      {affiliation && <p>Affiliation: {affiliation}</p>}
-      {roles && roles.length > 0 && <p>Roles: {roles.join(', ')}</p>}
+      {/* Wrap the textual details in a separate container */}
+      <div className="person-details">
+        {name ? (
+          <Link to={`/people/${encodeURIComponent(email)}`}>
+            <h2>{name}</h2>
+          </Link>
+        ) : (
+          <h2>Unnamed Person</h2>
+        )}
+        
+        <p>Email: {email}</p>
+        {affiliation && <p>Affiliation: {affiliation}</p>}
+        {roles && roles.length > 0 && <p>Roles: {roles.join(', ')}</p>}
+      </div>
+
       <div className="person-actions">
-        <button type="button" onClick={() => onEdit(person)} className="edit-button">Edit</button>
-        <button type="button" onClick={handleDelete} className="delete-button">Delete</button>
+        <button type="button" onClick={() => onEdit(person)}>Edit</button>
+        <button type="button" onClick={handleDelete}>Delete</button>
       </div>
     </div>
   );

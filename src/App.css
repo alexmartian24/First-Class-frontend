@@ -159,6 +159,7 @@ nav a {
   border-radius: 5px 5px 0 0;
   position: relative;
 }
+
 nav a:hover::before,
 nav a:focus::before {
   content: '';
@@ -171,6 +172,7 @@ nav a:focus::before {
   bottom: 0;
   left: calc(var(--padding) * -1 + 1px);
 }
+
 nav a:hover::after,
 nav a:focus::after {
   content: '';
@@ -192,18 +194,68 @@ nav a:focus {
 }
 
 .person-container {
-  border: 2px solid var(--accent-color);
-  margin: 1rem 0;
-  padding: 2rem;
+  padding: 0.75rem;
+  margin: 0.75rem 0;
+  border: 1px solid var(--accent-color);
+  border-radius: 8px;
+  background-color: #fff;
   display: flex;
   justify-content: space-between;
-  border-radius: 5px;
+  align-items: flex-start;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.person-container p,
-.person-container h2 {
+.person-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.person-details a {
+  color: black;
+  text-decoration: underline;
+  text-decoration-color: black;
+}
+
+.person-details a:hover,
+.person-details a:focus {
+  color: #333;                
+  text-decoration-color: #333; 
+}
+
+.person-details h2 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.1rem;
+  color: #000;
+}
+
+.person-details p {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.4;
+}
+
+.person-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.person-actions button {
+  font-size: 1rem;
+  padding: 0.4rem 0.8rem;
+  border: 2px solid var(--accent-color);
+  border-radius: 5px;
+  background: var(--background-color);
+  color: var(--accent-color);
+  cursor: pointer;
+}
+
+.person-actions button:hover,
+.person-actions button:focus {
+  background: var(--accent-color);
+  color: var(--background-color);
+  outline: none;
 }
 
 body {
