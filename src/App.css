@@ -149,6 +149,8 @@ nav ul {
 }
 
 nav a {
+  position: relative; 
+  z-index: 1;
   color: var(--background-color);
   display: block;
   --padding: 1rem;
@@ -157,7 +159,12 @@ nav a {
   font-weight: bold;
   --border-radius: 15px;
   border-radius: 5px 5px 0 0;
-  position: relative;
+}
+
+nav a.active {
+  z-index: 2; 
+  background-color: var(--background-color);
+  color: var(--accent-color);
 }
 
 nav a:hover::before,
@@ -191,6 +198,7 @@ nav a:focus {
   background-color: var(--background-color);
   color: var(--accent-color);
   outline: none;
+  z-index: 3;
 }
 
 .person-container {
@@ -253,6 +261,81 @@ nav a:focus {
 
 .person-actions button:hover,
 .person-actions button:focus {
+  background: var(--accent-color);
+  color: var(--background-color);
+  outline: none;
+}
+
+.settings-container {
+  padding: 1rem 2rem;
+  max-width: 800px;
+}
+
+.settings-container h1 {
+  margin-bottom: 1.5rem;
+  font-size: 2rem; 
+}
+
+.settings-section {
+  margin-bottom: 2rem;
+}
+
+.settings-section h2 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: var(--accent-color);
+}
+
+.setting-field {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.setting-field label {
+  font-size: 1rem; 
+  margin-right: 0.5rem;
+  color: #333;
+}
+
+.setting-field input[type="checkbox"] {
+  transform: scale(1.2);
+  margin-right: 0.5rem;
+}
+
+.setting-field select {
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--accent-color);
+  border-radius: 4px;
+}
+
+.settings-container .setting-field select {
+  width: auto !important;
+  min-width: 120px;
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--accent-color);
+  border-radius: 4px;
+}
+
+.account-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.account-actions button {
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--accent-color);
+  border-radius: 5px;
+  background: var(--background-color);
+  color: var(--accent-color);
+  cursor: pointer;
+}
+
+.account-actions button:hover,
+.account-actions button:focus {
   background: var(--accent-color);
   color: var(--background-color);
   outline: none;
