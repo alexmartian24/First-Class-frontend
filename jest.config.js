@@ -210,4 +210,17 @@ const config = {
   transformIgnorePatterns: ["node_modules/(?!axios|@bundled-es-modules|jest-fixed-jsdom)"],
 };
 
-module.exports = config;
+module.exports = {
+  testEnvironment: "jsdom",
+  testEnvironmentOptions: {
+    resources: "usable",
+  },
+  clearMocks: true,
+  moduleNameMapper: {
+    "\\.(css|less)$": "<rootDir>/test/jest/__mocks__/styleMock.js",
+  },
+  transform: {
+    "\\.jsx?$": "babel-jest",
+  },
+  transformIgnorePatterns: ["node_modules/(?!axios|@bundled-es-modules|jest-fixed-jsdom)"],
+};

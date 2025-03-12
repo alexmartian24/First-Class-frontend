@@ -2,6 +2,8 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event'
 import App from './App';
+import "@testing-library/jest-dom";
+
 // import { homeHeader } from './App'
 
 describe('App', () => {
@@ -15,7 +17,7 @@ describe('App', () => {
       .toHaveTextContent('Journal');
       //.toHaveTextContent(homeHeader);
 
-    expect(screen.getAllByRole('listitem')).toHaveLength(3)
+    expect(screen.getAllByRole('listitem')).toHaveLength(5)
     
   })
 });
