@@ -20,6 +20,7 @@ function Home() {
           <p className="action-text">
             Click below to get started and explore the people database, manage
             submissions, and interact with the system.
+            <Link to="/about" className="read-more-button">Read More</Link>
           </p>
           
           <Link to="/people" className="cta-button">
