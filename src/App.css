@@ -348,6 +348,11 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+.about-container {
+  /* margin: 1rem 2rem; */
+  padding: 1rem 2rem;
+}
+
 .light-mode {
   background-color: #f8f9fa;
   color: black;

@@ -17,7 +17,7 @@ function About() {
         submissions, people, and data records with ease.
       </p>
       <p>
-        Whether you’re a contributor, reviewer, or simply browsing, <strong>Journal</strong>
+        Whether you’re a contributor, reviewer, or simply browsing, <strong>Journal </strong> 
         provides an intuitive and seamless experience tailored to your needs.
         Our platform is built to streamline data management, enhance collaboration,
         and ensure efficient record-keeping—all in one place.
@@ -36,7 +36,7 @@ function About() {
       <p>
         Explore the people database, manage submissions, and take full advantage of
         the platform’s capabilities. Whether you’re looking to contribute or gain insights,
-        <strong>Journal</strong> makes the process simple and effective.
+        <strong> Journal</strong> makes the process simple and effective.
       </p>
     </div>
   );
