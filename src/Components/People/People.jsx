@@ -5,6 +5,9 @@ import { Link } from 'react-router-dom';
 
 import { BACKEND_URL } from '../../constants';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+
 const PEOPLE_READ_ENDPOINT = `${BACKEND_URL}/people`;
 const PEOPLE_CREATE_ENDPOINT = `${BACKEND_URL}/people/create`;
 const PEOPLE_DELETE_ENDPOINT = (email) => `${BACKEND_URL}/people/${encodeURIComponent(email)}`;
@@ -211,8 +214,8 @@ function Person({ person, fetchPeople, setError, onEdit }) {
       </div>
 
       <div className="person-actions">
-        <button type="button" onClick={() => onEdit(person)}>Edit</button>
-        <button type="button" onClick={handleDelete}>Delete</button>
+        <button type="button" onClick={() => onEdit(person)}><FontAwesomeIcon icon={faPencilAlt} /></button>
+        <button type="button" onClick={handleDelete}><FontAwesomeIcon icon={faTrashAlt} /></button>
       </div>
     </div>
   );
