@@ -248,10 +248,17 @@ function People() {
   const fetchPeople = () => {
     setLoading(true);
     axios.get(PEOPLE_READ_ENDPOINT)
-      .then(({ data }) => setPeople(peopleObjectToArray(data)))
+      .then(({ data }) => {
+        // Extract links for each person
+        const peopleWithLinks = peopleObjectToArray(data).map(person => ({
+          ...person,
+          _links: person._links || {}  // Ensure links exist
+        }));
+        setPeople(peopleWithLinks);
+      })
       .catch((error) => setError(`Failed to retrieve people: ${error.message}`))
       .finally(() => setLoading(false));
-  };
+};
 
   useEffect(() => {
     fetchPeople();
