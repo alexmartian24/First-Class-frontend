@@ -10,7 +10,6 @@ import { faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
 const PEOPLE_READ_ENDPOINT = `${BACKEND_URL}/people`;
 const PEOPLE_CREATE_ENDPOINT = `${BACKEND_URL}/people/create`;
-const PEOPLE_DELETE_ENDPOINT = (email) => `${BACKEND_URL}/people/${encodeURIComponent(email)}`;
 const PEOPLE_UPDATE_ENDPOINT = (email) => `${BACKEND_URL}/people/update/${encodeURIComponent(email)}`;
 
 function EditPersonForm({ visible, person, cancel, fetchPeople, setError }) {
@@ -188,13 +187,18 @@ function Person({ person, fetchPeople, setError, onEdit }) {
 
   const handleDelete = () => {
     if (window.confirm(`Are you sure you want to delete ${name || email}?`)) {
-      axios.delete(PEOPLE_DELETE_ENDPOINT(email))
+      if (!person._links || !person._links.delete) {
+        setError("Delete link is missing from API response.");
+        return;
+      }
+
+      axios.delete(person._links.delete.href)
         .then(() => {
           fetchPeople();
         })
         .catch((error) => setError(`Failed to delete person: ${error.message}`));
     }
-  };
+};
 
   return (
     <div className="person-container">
@@ -227,6 +231,14 @@ Person.propTypes = {
     email: PropTypes.string.isRequired,
     affiliation: PropTypes.string,
     roles: PropTypes.arrayOf(PropTypes.string),
+    _links: PropTypes.shape({  
+      delete: PropTypes.shape({
+        href: PropTypes.string
+      }),
+      update: PropTypes.shape({
+        href: PropTypes.string
+      }),
+    }),
   }).isRequired,
   fetchPeople: PropTypes.func.isRequired,
   setError: PropTypes.func.isRequired,
