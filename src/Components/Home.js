@@ -1,8 +1,29 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./Home.css";
 
 function Home() {
+  const quotes = [
+    "Oh you're here? Why?",
+    "Oh welcome back, I forgot about you.",
+    "Why did you wake me up?",
+    "You again? What do you want?",
+    "I was having such a nice nap...",
+    "Did you really have to come back?",
+    "Hmph. I guess you have business here.",
+    "Ugh, fine. Let's get this over with.",
+    "You took your time, didn't you?",
+    "Welcome back… I guess."
+  ];
+
+  const [currentQuote, setCurrentQuote] = useState("");
+
+  useEffect(() => {
+    // Generate a new random quote on every page refresh
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    setCurrentQuote(quotes[randomIndex]);
+  }, []);
+
   return (
     <div className="home-container">
       <div className="hero-section">
@@ -10,6 +31,10 @@ function Home() {
           <h1 className="title">Journal</h1>
           <div className="subtitle-line"></div>
           
+          <p className="random-quote">
+            <span>&ldquo;{currentQuote}&rdquo;</span>
+          </p>
+
           <p className="description">
             Welcome to Journal, a platform where you can manage and explore
             various submissions, people, and data records seamlessly. Whether

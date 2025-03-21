@@ -1,6 +1,7 @@
 import React from 'react';
 import propTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import './Navbar.css'; // Make sure to create this CSS file
 
 const PAGES = [
   { label: 'Home', destination: '/' },
@@ -13,8 +14,8 @@ const PAGES = [
 function NavLink({ page }) {
   const { label, destination } = page;
   return (
-    <li>
-      <Link to={destination}>{label}</Link>
+    <li className="nav-item">
+      <Link to={destination} className="nav-link">{label}</Link>
     </li>
   );
 }
@@ -28,8 +29,8 @@ NavLink.propTypes = {
 
 function Navbar() {
   return (
-    <nav style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <ul style={{ display: 'flex', listStyle: 'none', padding: 0, margin: 0, gap: '20px' }}>
+    <nav className="navbar">
+      <ul className="nav-list">
         {PAGES.map((page) => (
           <NavLink key={page.destination} page={page} />
         ))}

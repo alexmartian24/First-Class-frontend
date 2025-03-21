@@ -6,15 +6,15 @@
 
 html {
   --poppy: hsla(356, 74%, 52%, 1);
-  --cambridge-blue: hsla(132, 27%, 63%, 1);
+  --gradient-start: hsla(250, 90%, 60%, 1); /* Adjusted for navbar */
+  --gradient-end: hsla(230, 90%, 60%, 1);   /* Adjusted for navbar */
   --lemon-chiffon: hsla(58, 74%, 85%, 1);
   --buff: hsla(27, 64%, 65%, 1);
   --bistre: hsla(10, 31%, 19%, 1);
   --off-white: hsla(45, 29%, 97%, 1);
 
   --background-color: var(--off-white);
-  --accent-color: var(--cambridge-blue);
-  background-color: var(--background-color);
+  --accent-color: var(--gradient-start); /* Updated to match navbar */
 }
 
 .wrapper {
@@ -56,7 +56,7 @@ button:hover {
 
 form input {
   display: block;
-  margin: .5rem 0 1rem 0;
+  margin: 0.5rem 0 1rem 0;
   padding: 1rem 0.5rem 0.5rem 0.5rem;
   border-radius: 5px;
   border: 1px solid var(--accent-color);
@@ -64,58 +64,35 @@ form input {
 }
 
 input[type="text"], select {
-  width: 100%;   /* Ensures the input fields take the full width */
+  width: 100%;
   padding: 8px;
-  box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+  box-sizing: border-box;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
-/* Match the email field to other inputs */
 form input[type="email"] {
-  width: 100%;   /* Ensures the input fields take the full width */
+  width: 100%;
   padding: 8px;
-  box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+  box-sizing: border-box;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-/* Override Chrome's green border for valid email */
+
 form input[type="email"]:valid,
 form input[type="email"]:invalid {
-  box-shadow: none; /* remove the colored glow */
-  border: 1px solid #ccc; /* match your other fields */
+  box-shadow: none;
+  border: 1px solid #ccc;
 }
 
 form select {
-  width: 100%;   /* Ensures the input fields take the full width */
+  width: 100%;
   padding: 8px;
-  box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+  box-sizing: border-box;
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 1rem; /* match your input font-size */
+  font-size: 1rem;
 }
-
-/* form label {
-  margin-left: 1rem;
-  display: block;
-  height: 0;
-  width: fit-content;
-  position: relative;
-  z-index: 1;
-}
-form label::before,
-form label::after {
-  content: '';
-  position: absolute;
-  height: 1.65rem;
-  top: -.25rem;
-  left: -5px;
-  width: calc(100% + 10px);
-  border: 2px solid var(--accent-color);
-  border-radius: 5px;
-  background-color: white;
-  z-index: -1;
-} */
 
 form label {
   display: block;
@@ -127,18 +104,21 @@ form label {
 form button {
   margin-right: 1rem;
 }
+
 form button[type=button] {
   border-color: var(--background-color);
 }
+
 form button[type=button]:focus,
 form button[type=button]:hover {
   border-color: var(--accent-color);
 }
 
+/* NAVBAR FIX: ADDED GRADIENT BACKGROUND */
 nav {
   margin: 0;
   padding-top: 0.5rem;
-  background-color: var(--accent-color);
+  background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
 }
 
 nav ul {
@@ -149,7 +129,7 @@ nav ul {
 }
 
 nav a {
-  position: relative; 
+  position: relative;
   z-index: 1;
   color: var(--background-color);
   display: block;
@@ -159,46 +139,6 @@ nav a {
   font-weight: bold;
   --border-radius: 15px;
   border-radius: 5px 5px 0 0;
-}
-
-nav a.active {
-  z-index: 2; 
-  background-color: var(--background-color);
-  color: var(--accent-color);
-}
-
-nav a:hover::before,
-nav a:focus::before {
-  content: '';
-  position: absolute;
-  width: var(--border-radius);
-  height: var(--border-radius);
-  border-radius: 0 0 100vw 0;
-  box-shadow: 5px 5px 0 5px var(--background-color);
-  background-color: var(--accent-color);
-  bottom: 0;
-  left: calc(var(--padding) * -1 + 1px);
-}
-
-nav a:hover::after,
-nav a:focus::after {
-  content: '';
-  position: absolute;
-  width: var(--border-radius);
-  height: var(--border-radius);
-  border-radius: 0 0 0 100vw;
-  box-shadow: -5px 5px 0 5px var(--background-color);
-  background-color: var(--accent-color);
-  bottom: 0;
-  right: calc(var(--padding) * -1 + 1px);
-}
-
-nav a:hover,
-nav a:focus {
-  background-color: var(--background-color);
-  color: var(--accent-color);
-  outline: none;
-  z-index: 3;
 }
 
 .person-container {
@@ -222,13 +162,11 @@ nav a:focus {
 .person-details a {
   color: black;
   text-decoration: underline;
-  text-decoration-color: black;
 }
 
 .person-details a:hover,
 .person-details a:focus {
-  color: #333;                
-  text-decoration-color: #333; 
+  color: #333;
 }
 
 .person-details h2 {
@@ -244,28 +182,6 @@ nav a:focus {
   line-height: 1.4;
 }
 
-.person-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.person-actions button {
-  font-size: 1rem;
-  padding: 0.4rem 0.8rem;
-  border: 2px solid var(--accent-color);
-  border-radius: 5px;
-  background: var(--background-color);
-  color: var(--accent-color);
-  cursor: pointer;
-}
-
-.person-actions button:hover,
-.person-actions button:focus {
-  background: var(--accent-color);
-  color: var(--background-color);
-  outline: none;
-}
-
 .settings-container {
   padding: 1rem 2rem;
   max-width: 800px;
@@ -273,7 +189,7 @@ nav a:focus {
 
 .settings-container h1 {
   margin-bottom: 1.5rem;
-  font-size: 2rem; 
+  font-size: 2rem;
 }
 
 .settings-section {
@@ -293,7 +209,7 @@ nav a:focus {
 }
 
 .setting-field label {
-  font-size: 1rem; 
+  font-size: 1rem;
   margin-right: 0.5rem;
   color: #333;
 }
@@ -346,11 +262,6 @@ body {
   padding: 0;
   font-family: Arial, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.about-container {
-  /* margin: 1rem 2rem; */
-  padding: 1rem 2rem;
 }
 
 .light-mode {
