@@ -8,9 +8,19 @@ import { BACKEND_URL } from '../../constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
+// Axios configuration for cross-origin requests
+const axiosConfig = {
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  withCredentials: false  // Required for cross-origin requests to public API
+};
+
 const PEOPLE_READ_ENDPOINT = `${BACKEND_URL}/people`;
 const PEOPLE_CREATE_ENDPOINT = `${BACKEND_URL}/people/create`;
 const PEOPLE_UPDATE_ENDPOINT = (email) => `${BACKEND_URL}/people/update/${encodeURIComponent(email)}`;
+const PEOPLE_DELETE_ENDPOINT = (email) => `${BACKEND_URL}/people/${encodeURIComponent(email)}`;
 
 function EditPersonForm({ visible, person, cancel, fetchPeople, setError }) {
   const [name, setName] = useState('');
@@ -41,7 +51,7 @@ function EditPersonForm({ visible, person, cancel, fetchPeople, setError }) {
       role 
     };
 
-    axios.put(PEOPLE_UPDATE_ENDPOINT(person.email), updatedPerson)
+    axios.put(PEOPLE_UPDATE_ENDPOINT(person.email), updatedPerson, axiosConfig)
       .then(() => {
         fetchPeople();
         cancel();
@@ -117,7 +127,7 @@ function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
 
     const newPerson = { name, email, affiliation, role };
 
-    axios.put(PEOPLE_CREATE_ENDPOINT, newPerson)
+    axios.put(PEOPLE_CREATE_ENDPOINT, newPerson, axiosConfig)
       .then(() => {
         fetchPeople();
         setName('');
@@ -186,19 +196,22 @@ function Person({ person, fetchPeople, setError, onEdit }) {
   const { name, email, affiliation, roles } = person;
 
   const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete ${name || email}?`)) {
-      if (!person._links || !person._links.delete) {
-        setError("Delete link is missing from API response.");
-        return;
+    try {
+      // Try to show confirmation dialog
+      const confirmResult = window.confirm(`Are you sure you want to delete ${name || email}?`);
+      
+      if (confirmResult) {
+        axios.delete(PEOPLE_DELETE_ENDPOINT(email), axiosConfig)
+          .then(() => {
+            fetchPeople();
+          })
+          .catch((error) => setError(`Failed to delete person: ${error.message}`));
       }
-
-      axios.delete(person._links.delete.href)
-        .then(() => {
-          fetchPeople();
-        })
-        .catch((error) => setError(`Failed to delete person: ${error.message}`));
+    } catch (error) {
+      // Some browsers might throw an error when popups are blocked
+      setError('Cannot delete: Browser popups are disabled. Please enable popups and try again.');
     }
-};
+  };
 
   return (
     <div className="person-container">
@@ -231,18 +244,18 @@ Person.propTypes = {
     email: PropTypes.string.isRequired,
     affiliation: PropTypes.string,
     roles: PropTypes.arrayOf(PropTypes.string),
-    _links: PropTypes.shape({  
-      delete: PropTypes.shape({
-        href: PropTypes.string
-      }),
-      update: PropTypes.shape({
-        href: PropTypes.string
-      }),
-    }),
+    // _links: PropTypes.shape({  
+    //   delete: PropTypes.shape({
+    //     href: PropTypes.string
+    //   }),
+    //   update: PropTypes.shape({
+    //     href: PropTypes.string
+    //   }),
+    // }),
   }).isRequired,
   fetchPeople: PropTypes.func.isRequired,
   setError: PropTypes.func.isRequired,
-  onEdit: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired
 };
 
 function peopleObjectToArray(data) {
@@ -259,22 +272,18 @@ function People() {
 
   const fetchPeople = () => {
     setLoading(true);
-    axios.get(PEOPLE_READ_ENDPOINT)
+    axios.get(PEOPLE_READ_ENDPOINT, axiosConfig)
       .then(({ data }) => {
-        // Extract links for each person
-        const peopleWithLinks = peopleObjectToArray(data).map(person => ({
-          ...person,
-          _links: person._links || {}  // Ensure links exist
-        }));
-        setPeople(peopleWithLinks);
+        const peopleArray = peopleObjectToArray(data);
+        setPeople(peopleArray);
       })
       .catch((error) => setError(`Failed to retrieve people: ${error.message}`))
       .finally(() => setLoading(false));
-};
+  };
 
   useEffect(() => {
     fetchPeople();
-  }, []);
+  }, [setError]);
 
   const handleEditPerson = (person) => {
     setEditingPerson(person);
