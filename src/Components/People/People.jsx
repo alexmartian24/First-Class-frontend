@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import './People.css';
 
 import { BACKEND_URL } from '../../constants';
 
@@ -12,15 +13,17 @@ import { faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 const axiosConfig = {
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    Accept: 'application/json',
   },
-  withCredentials: false  // Required for cross-origin requests to public API
+  withCredentials: false, // Required for cross-origin requests to public API
 };
 
 const PEOPLE_READ_ENDPOINT = `${BACKEND_URL}/people`;
 const PEOPLE_CREATE_ENDPOINT = `${BACKEND_URL}/people/create`;
-const PEOPLE_UPDATE_ENDPOINT = (email) => `${BACKEND_URL}/people/update/${encodeURIComponent(email)}`;
-const PEOPLE_DELETE_ENDPOINT = (email) => `${BACKEND_URL}/people/${encodeURIComponent(email)}`;
+const PEOPLE_UPDATE_ENDPOINT = (email) =>
+  `${BACKEND_URL}/people/update/${encodeURIComponent(email)}`;
+const PEOPLE_DELETE_ENDPOINT = (email) =>
+  `${BACKEND_URL}/people/${encodeURIComponent(email)}`;
 
 function EditPersonForm({ visible, person, cancel, fetchPeople, setError }) {
   const [name, setName] = useState('');
@@ -37,6 +40,8 @@ function EditPersonForm({ visible, person, cancel, fetchPeople, setError }) {
     }
   }, [person]);
 
+  if (!visible || !person) return null;
+
   const handleSubmit = (event) => {
     event.preventDefault();
     if (!name || !newEmail || !affiliation || !role) {
@@ -44,35 +49,54 @@ function EditPersonForm({ visible, person, cancel, fetchPeople, setError }) {
       return;
     }
 
-    const updatedPerson = { 
-      name, 
+    const updatedPerson = {
+      name,
       email: newEmail, // Match backend parameter name
-      affiliation, 
-      role 
+      affiliation,
+      role,
     };
 
-    axios.put(PEOPLE_UPDATE_ENDPOINT(person.email), updatedPerson, axiosConfig)
+    axios
+      .put(PEOPLE_UPDATE_ENDPOINT(person.email), updatedPerson, axiosConfig)
       .then(() => {
         fetchPeople();
         cancel();
       })
-      .catch((error) => setError(`There was a problem updating the person: ${error.message}`));
+      .catch((error) =>
+        setError(`There was a problem updating the person: ${error.message}`)
+      );
   };
-
-  if (!visible || !person) return null;
 
   return (
     <form onSubmit={handleSubmit}>
       <h3>Edit Person</h3>
-      
+
       <label htmlFor="edit-name">Name</label>
-      <input required type="text" id="edit-name" value={name} onChange={(e) => setName(e.target.value)} />
+      <input
+        required
+        type="text"
+        id="edit-name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
 
       <label htmlFor="edit-email">Email</label>
-      <input required type="email" id="edit-email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+      <input
+        required
+        type="email"
+        id="edit-email"
+        value={newEmail}
+        onChange={(e) => setNewEmail(e.target.value)}
+      />
 
       <label htmlFor="edit-affiliation">Affiliation</label>
-      <input required type="text" id="edit-affiliation" value={affiliation} onChange={(e) => setAffiliation(e.target.value)} />
+      <input
+        required
+        type="text"
+        id="edit-affiliation"
+        value={affiliation}
+        onChange={(e) => setAffiliation(e.target.value)}
+      />
 
       <label htmlFor="edit-role">Role</label>
       <select
@@ -90,9 +114,11 @@ function EditPersonForm({ visible, person, cancel, fetchPeople, setError }) {
         <option value="Referee">Referee</option>
         <option value="Typesetter">Typesetter</option>
       </select>
-      
+
       <div className="form-buttons">
-        <button type="button" onClick={cancel}>Cancel</button>
+        <button type="button" onClick={cancel}>
+          Cancel
+        </button>
         <button type="submit">Save Changes</button>
       </div>
     </form>
@@ -118,6 +144,8 @@ function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
   const [affiliation, setAffiliation] = useState('');
   const [role, setRole] = useState('');
 
+  if (!visible) return null;
+
   const handleSubmit = (event) => {
     event.preventDefault();
     if (!name || !email || !affiliation || !role) {
@@ -127,29 +155,49 @@ function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
 
     const newPerson = { name, email, affiliation, role };
 
-    axios.put(PEOPLE_CREATE_ENDPOINT, newPerson, axiosConfig)
+    axios
+      .put(PEOPLE_CREATE_ENDPOINT, newPerson, axiosConfig)
       .then(() => {
         fetchPeople();
         setName('');
         setEmail('');
         setAffiliation('');
         setRole('');
+        cancel(); // Hide the form after successful submission
       })
-      .catch((error) => setError(`There was a problem adding the person: ${error.message}`));
+      .catch((error) =>
+        setError(`There was a problem adding the person: ${error.message}`)
+      );
   };
-
-  if (!visible) return null;
 
   return (
     <form onSubmit={handleSubmit}>
       <label htmlFor="name">Name</label>
-      <input required type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} />
+      <input
+        required
+        type="text"
+        id="name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
 
       <label htmlFor="email">Email</label>
-      <input required type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <input
+        required
+        type="email"
+        id="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
       <label htmlFor="affiliation">Affiliation</label>
-      <input required type="text" id="affiliation" value={affiliation} onChange={(e) => setAffiliation(e.target.value)} />
+      <input
+        required
+        type="text"
+        id="affiliation"
+        value={affiliation}
+        onChange={(e) => setAffiliation(e.target.value)}
+      />
 
       <label htmlFor="role">Role</label>
       <select
@@ -167,9 +215,11 @@ function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
         <option value="Referee">Referee</option>
         <option value="Typesetter">Typesetter</option>
       </select>
-      
+
       <div className="form-buttons">
-        <button type="button" onClick={cancel}>Cancel</button>
+        <button type="button" onClick={cancel}>
+          Cancel
+        </button>
         <button type="submit">Submit</button>
       </div>
     </form>
@@ -197,25 +247,28 @@ function Person({ person, fetchPeople, setError, onEdit }) {
 
   const handleDelete = () => {
     try {
-      // Try to show confirmation dialog
-      const confirmResult = window.confirm(`Are you sure you want to delete ${name || email}?`);
-      
+      const confirmResult = window.confirm(
+        `Are you sure you want to delete ${name || email}?`
+      );
       if (confirmResult) {
-        axios.delete(PEOPLE_DELETE_ENDPOINT(email), axiosConfig)
+        axios
+          .delete(PEOPLE_DELETE_ENDPOINT(email), axiosConfig)
           .then(() => {
             fetchPeople();
           })
-          .catch((error) => setError(`Failed to delete person: ${error.message}`));
+          .catch((error) =>
+            setError(`Failed to delete person: ${error.message}`)
+          );
       }
     } catch (error) {
-      // Some browsers might throw an error when popups are blocked
-      setError('Cannot delete: Browser popups are disabled. Please enable popups and try again.');
+      setError(
+        'Cannot delete: Browser popups are disabled. Please enable popups and try again.'
+      );
     }
   };
 
   return (
     <div className="person-container">
-      {/* Wrap the textual details in a separate container */}
       <div className="person-details">
         {name ? (
           <Link to={`/people/${encodeURIComponent(email)}`}>
@@ -224,15 +277,18 @@ function Person({ person, fetchPeople, setError, onEdit }) {
         ) : (
           <h2>Unnamed Person</h2>
         )}
-        
         <p>Email: {email}</p>
         {affiliation && <p>Affiliation: {affiliation}</p>}
         {roles && roles.length > 0 && <p>Roles: {roles.join(', ')}</p>}
       </div>
 
       <div className="person-actions">
-        <button type="button" onClick={() => onEdit(person)}><FontAwesomeIcon icon={faPencilAlt} /></button>
-        <button type="button" onClick={handleDelete}><FontAwesomeIcon icon={faTrashAlt} /></button>
+        <button type="button" onClick={() => onEdit(person)}>
+          <FontAwesomeIcon icon={faPencilAlt} />
+        </button>
+        <button type="button" onClick={handleDelete}>
+          <FontAwesomeIcon icon={faTrashAlt} />
+        </button>
       </div>
     </div>
   );
@@ -244,20 +300,13 @@ Person.propTypes = {
     email: PropTypes.string.isRequired,
     affiliation: PropTypes.string,
     roles: PropTypes.arrayOf(PropTypes.string),
-    // _links: PropTypes.shape({  
-    //   delete: PropTypes.shape({
-    //     href: PropTypes.string
-    //   }),
-    //   update: PropTypes.shape({
-    //     href: PropTypes.string
-    //   }),
-    // }),
   }).isRequired,
   fetchPeople: PropTypes.func.isRequired,
   setError: PropTypes.func.isRequired,
-  onEdit: PropTypes.func.isRequired
+  onEdit: PropTypes.func.isRequired,
 };
 
+// Convert the backend data structure (object keyed by email) to an array
 function peopleObjectToArray(data) {
   if (!data) return [];
   return Object.entries(data).map(([email, person]) => ({ ...person, email }));
@@ -270,26 +319,40 @@ function People() {
   const [addingPerson, setAddingPerson] = useState(false);
   const [editingPerson, setEditingPerson] = useState(null);
 
+  // Fetch the people from the backend
   const fetchPeople = () => {
     setLoading(true);
-    axios.get(PEOPLE_READ_ENDPOINT, axiosConfig)
+    axios
+      .get(PEOPLE_READ_ENDPOINT, axiosConfig)
       .then(({ data }) => {
         const peopleArray = peopleObjectToArray(data);
         setPeople(peopleArray);
       })
-      .catch((error) => setError(`Failed to retrieve people: ${error.message}`))
+      .catch((error) =>
+        setError(`Failed to retrieve people: ${error.message}`)
+      )
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     fetchPeople();
-  }, [setError]);
+  }, []);
 
+  // When clicking "Edit," set the editing person, hide the add form, and scroll to that spot
   const handleEditPerson = (person) => {
     setEditingPerson(person);
     setAddingPerson(false);
+
+    // Wait for React to render the edit form, then scroll to it
+    setTimeout(() => {
+      const element = document.getElementById(`edit-person-${person.email}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
   };
 
+  // Cancel editing
   const handleCancelEdit = () => {
     setEditingPerson(null);
   };
@@ -298,14 +361,21 @@ function People() {
     <div className="wrapper">
       <header>
         <h1>View All People</h1>
-        <button type="button" onClick={() => {
-          setAddingPerson(true);
-          setEditingPerson(null);
-        }}>Add a Person</button>
+        <button
+          type="button"
+          onClick={() => {
+            setAddingPerson(true);
+            setEditingPerson(null);
+          }}
+        >
+          Add a Person
+        </button>
       </header>
 
       {error && <ErrorMessage message={error} />}
-      {loading ? <p>Loading...</p> : (
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
         <>
           <AddPersonForm
             visible={addingPerson}
@@ -313,27 +383,40 @@ function People() {
             fetchPeople={fetchPeople}
             setError={setError}
           />
-          
-          <EditPersonForm
-            visible={!!editingPerson}
-            person={editingPerson}
-            cancel={handleCancelEdit}
-            fetchPeople={fetchPeople}
-            setError={setError}
-          />
-          
-          {people.map((person) => (
-            <Person 
-              key={person.email} 
-              person={person} 
-              fetchPeople={fetchPeople}
-              setError={setError}
-              onEdit={handleEditPerson}
-            />
-          ))}
+
+          {/* 
+            Map over the people. If the current person is being edited,
+            show the EditPersonForm inline. Otherwise, show the Person card.
+          */}
+          {people.map((person) => {
+            if (editingPerson && editingPerson.email === person.email) {
+              return (
+                <div key={person.email} id={`edit-person-${person.email}`}>
+                  <EditPersonForm
+                    visible
+                    person={person}
+                    cancel={handleCancelEdit}
+                    fetchPeople={fetchPeople}
+                    setError={setError}
+                  />
+                </div>
+              );
+            } else {
+              return (
+                <Person
+                  key={person.email}
+                  person={person}
+                  fetchPeople={fetchPeople}
+                  setError={setError}
+                  onEdit={handleEditPerson}
+                />
+              );
+            }
+          })}
         </>
       )}
     </div>
   );
 }
+
 export default People;
