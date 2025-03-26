@@ -1,159 +1,237 @@
+/* 1) Import a modern font (optional) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f9fafc; /* Light neutral background */
+  font-family: 'Inter', sans-serif;
+  color: #333;
+}
+
+/* Main container */
 .dashboard-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   padding-top: 100px;
 }
 
+/* Page heading */
+.dashboard-container h1 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+  color: #4a3fe2; /* Accent color */
+}
+
+/* Buttons row (Create Manuscript / Perform Action) */
 .dashboard-buttons {
-  margin: 2rem 0;
   display: flex;
+  justify-content: center;
   gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .dashboard-buttons button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
   background: #4a3fe2;
-  color: white;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
 }
 
 .dashboard-buttons button:hover {
-  opacity: 0.9;
+  background: #3a2fb2; /* Slightly darker on hover */
 }
 
+/* Error message styling */
 .error-message {
   color: #dc3545;
-  margin: 1rem 0;
-  padding: 0.5rem;
-  border-radius: 4px;
+  margin: 1rem auto;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
-  z-index: 1;
+  max-width: 600px; /* Center and limit width */
 }
 
+/* Form containers (Create / Action) */
 .manuscript-form,
 .manuscript-action-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 2rem;
-  background: #fff;
+  background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: relative;
-  margin-top: 20px;
+  padding: 2rem;
+  margin: 0 auto 2rem; /* Center, then 2rem bottom margin */
+  max-width: 600px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
-.form-header {
-  margin-bottom: 1.5rem;
-  margin-bottom: 20px;
+.manuscript-form h2,
+.manuscript-action-form h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #4a3fe2;
 }
 
-.form-header h2 {
-  margin: 0;
-  color: #333;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  font-weight: 500;
-  color: #555;
+/* Labels & inputs inside forms */
+.manuscript-form label,
+.manuscript-action-form label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
 }
 
-.form-group input,
-.form-group select {
-  padding: 0.5rem;
+.manuscript-form input,
+.manuscript-form select,
+.manuscript-action-form input,
+.manuscript-action-form select {
+  width: 100%;
+  padding: 0.75rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+  transition: border-color 0.2s ease;
 }
 
+.manuscript-form input:focus,
+.manuscript-form select:focus,
+.manuscript-action-form input:focus,
+.manuscript-action-form select:focus {
+  outline: none;
+  border-color: #4a3fe2;
+}
+
+/* Form buttons (Cancel, Submit) */
 .form-buttons {
   display: flex;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
+  justify-content: flex-end;
 }
 
 .form-buttons button {
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
-  margin-right: 10px;
 }
 
+/* Cancel button */
 .form-buttons button[type="button"] {
   background: #f0f0f0;
   color: #333;
 }
 
+.form-buttons button[type="button"]:hover {
+  background: #e0e0e0;
+}
+
+/* Submit button */
 .form-buttons button[type="submit"] {
   background: #4a3fe2;
   color: white;
 }
 
-.form-buttons button:hover {
-  opacity: 0.9;
+.form-buttons button[type="submit"]:hover {
+  background: #3a2fb2;
 }
 
-input[type="text"], select {
-  width: 100%;   /* Ensures the input fields take the full width */
-  padding: 8px;
-  box-sizing: border-box; /* Includes padding and border in the element's total width and height */
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
+/* Table container */
 .manuscripts-list {
   width: 100%;
   margin-top: 2rem;
 }
 
+.manuscripts-list h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: left;
+  color: #4a3fe2;
+  font-weight: 600;
+}
+
+/* Table styling */
 .manuscripts-table {
   width: 100%;
-  border-collapse: collapse;
-  background: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-collapse: separate;
+  border-spacing: 0;
   border-radius: 8px;
   overflow: hidden;
+  background: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Gradient header row */
+.manuscripts-table thead {
+  background: linear-gradient(to right, #4a3fe2, #6f63ff);
+  color: #fff;
 }
 
 .manuscripts-table th,
 .manuscripts-table td {
-  padding: 12px 15px;
+  padding: 1rem;
   text-align: left;
+  font-size: 0.95rem;
   border-bottom: 1px solid #eee;
 }
 
-.manuscripts-table th {
-  background-color: #4a3fe2;
-  color: white;
-  font-weight: 500;
-}
-
+/* Subtle row hover effect */
 .manuscripts-table tbody tr:hover {
-  background-color: #f5f5f5;
+  background-color: #f7f7ff;
 }
 
+/* Remove bottom border on last row */
 .manuscripts-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+/* ============= STATE BADGES ============= */
+.state-badge {
+  display: inline-block;
+  padding: 0.35rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Example color-coding by state: SUB, REV, AUR, CED, WIT, REJ */
+.state-sub {
+  background-color: #e5f9f0; /* Light greenish */
+  color: #1aa179;
+}
+
+.state-rev {
+  background-color: #fff6e5; /* Light yellowish */
+  color: #db9c00;
+}
+
+.state-aur {
+  background-color: #e8f4ff; /* Light blueish */
+  color: #007acc;
+}
+
+.state-ced {
+  background-color: #ede5ff; /* Light purple */
+  color: #6c3fcf;
+}
+
+.state-wit {
+  background-color: #f3f3f3; /* Light gray */
+  color: #555;
+}
+
+.state-rej {
+  background-color: #ffe5e5; /* Light red/pink */
+  color: #e53935;
 }
