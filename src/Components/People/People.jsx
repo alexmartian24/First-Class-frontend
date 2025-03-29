@@ -143,17 +143,18 @@ function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
   const [email, setEmail] = useState('');
   const [affiliation, setAffiliation] = useState('');
   const [role, setRole] = useState('');
+  const [password, setPassword] = useState('');
 
   if (!visible) return null;
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!name || !email || !affiliation || !role) {
+    if (!name || !email || !affiliation || !role || !password) {
       setError('All fields are required.');
       return;
     }
 
-    const newPerson = { name, email, affiliation, role };
+    const newPerson = { name, email, affiliation, role, password };
 
     axios
       .put(PEOPLE_CREATE_ENDPOINT, newPerson, axiosConfig)
@@ -163,7 +164,8 @@ function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
         setEmail('');
         setAffiliation('');
         setRole('');
-        cancel(); // Hide the form after successful submission
+        setPassword('');
+        cancel();
       })
       .catch((error) =>
         setError(`There was a problem adding the person: ${error.message}`)
@@ -216,10 +218,18 @@ function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
         <option value="Typesetter">Typesetter</option>
       </select>
 
+      <label htmlFor="password">Password</label>
+      <input
+        required
+        type="password"
+        id="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Enter a secure password"
+      />
+
       <div className="form-buttons">
-        <button type="button" onClick={cancel}>
-          Cancel
-        </button>
+        <button type="button" onClick={cancel}>Cancel</button>
         <button type="submit">Submit</button>
       </div>
     </form>
