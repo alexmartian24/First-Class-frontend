@@ -4,6 +4,14 @@ function Settings() {
   const [notifications, setNotifications] = useState(true);
   const [language, setLanguage] = useState("English");
   const [darkMode, setDarkMode] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwords, setPasswords] = useState({
+    current: "",
+    new: "",
+    confirm: ""
+  });
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   const toggleNotifications = () => {
     setNotifications(!notifications);
@@ -15,6 +23,61 @@ function Settings() {
 
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
+  };
+
+  const openPasswordModal = () => {
+    setShowPasswordModal(true);
+    // Reset form state when opening modal
+    setPasswords({ current: "", new: "", confirm: "" });
+    setPasswordError("");
+    setPasswordSuccess("");
+  };
+
+  const closePasswordModal = () => {
+    setShowPasswordModal(false);
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswords(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handlePasswordSubmit = (e) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    // Simple validation
+    if (!passwords.current || !passwords.new || !passwords.confirm) {
+      setPasswordError("All fields are required");
+      return;
+    }
+
+    if (passwords.new !== passwords.confirm) {
+      setPasswordError("New passwords don't match");
+      return;
+    }
+
+    if (passwords.new.length < 8) {
+      setPasswordError("Password must be at least 8 characters long");
+      return;
+    }
+
+    // This is where you would typically make an API call to update the password
+    // For demonstration, we'll just simulate a successful password change
+    setTimeout(() => {
+      setPasswordSuccess("Password successfully changed!");
+      // Reset form after success
+      setPasswords({ current: "", new: "", confirm: "" });
+      
+      // Close modal after 2 seconds
+      setTimeout(() => {
+        closePasswordModal();
+      }, 2000);
+    }, 1000);
   };
 
   // Inline styles to avoid requiring external CSS
@@ -177,6 +240,84 @@ function Settings() {
       borderTop: `1px solid ${darkMode ? '#444' : '#eaeaea'}`,
       display: 'flex',
       justifyContent: 'flex-end'
+    },
+    // Modal styles
+    modalOverlay: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1000
+    },
+    modal: {
+      backgroundColor: darkMode ? '#2d2d2d' : '#ffffff',
+      borderRadius: '8px',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+      padding: '24px',
+      width: '100%',
+      maxWidth: '450px',
+      position: 'relative'
+    },
+    modalHeader: {
+      borderBottom: `1px solid ${darkMode ? '#444' : '#eaeaea'}`,
+      paddingBottom: '16px',
+      marginBottom: '24px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
+    },
+    modalTitle: {
+      fontSize: '20px',
+      fontWeight: 'bold',
+      margin: 0,
+      color: darkMode ? '#ffffff' : '#333333'
+    },
+    closeButton: {
+      backgroundColor: 'transparent',
+      border: 'none',
+      cursor: 'pointer',
+      fontSize: '20px',
+      color: darkMode ? '#aaa' : '#666'
+    },
+    formGroup: {
+      marginBottom: '16px'
+    },
+    label: {
+      display: 'block',
+      marginBottom: '8px',
+      fontSize: '14px',
+      fontWeight: '500',
+      color: darkMode ? '#dddddd' : '#444444'
+    },
+    input: {
+      width: '100%',
+      padding: '10px 12px',
+      borderRadius: '4px',
+      border: `1px solid ${darkMode ? '#555' : '#ddd'}`,
+      backgroundColor: darkMode ? '#444' : '#fff',
+      color: darkMode ? '#fff' : '#333',
+      fontSize: '14px'
+    },
+    errorText: {
+      color: '#f44336',
+      fontSize: '14px',
+      marginTop: '8px'
+    },
+    successText: {
+      color: '#4CAF50',
+      fontSize: '14px',
+      marginTop: '8px'
+    },
+    modalFooter: {
+      marginTop: '24px',
+      display: 'flex',
+      justifyContent: 'flex-end',
+      gap: '12px'
     }
   };
 
@@ -204,6 +345,84 @@ function Settings() {
           <span style={sliderBeforeStyle}></span>
         </span>
       </label>
+    );
+  };
+
+  // Password change modal
+  const renderPasswordModal = () => {
+    if (!showPasswordModal) return null;
+
+    return (
+      <div style={styles.modalOverlay}>
+        <div style={styles.modal}>
+          <div style={styles.modalHeader}>
+            <h2 style={styles.modalTitle}>Change Password</h2>
+            <button 
+              style={styles.closeButton}
+              onClick={closePasswordModal}
+            >
+              ×
+            </button>
+          </div>
+
+          <form onSubmit={handlePasswordSubmit}>
+            <div style={styles.formGroup}>
+              <label style={styles.label} htmlFor="current">Current Password</label>
+              <input
+                style={styles.input}
+                type="password"
+                id="current"
+                name="current"
+                value={passwords.current}
+                onChange={handlePasswordChange}
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label} htmlFor="new">New Password</label>
+              <input
+                style={styles.input}
+                type="password"
+                id="new"
+                name="new"
+                value={passwords.new}
+                onChange={handlePasswordChange}
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label} htmlFor="confirm">Confirm New Password</label>
+              <input
+                style={styles.input}
+                type="password"
+                id="confirm"
+                name="confirm"
+                value={passwords.confirm}
+                onChange={handlePasswordChange}
+              />
+            </div>
+
+            {passwordError && <div style={styles.errorText}>{passwordError}</div>}
+            {passwordSuccess && <div style={styles.successText}>{passwordSuccess}</div>}
+
+            <div style={styles.modalFooter}>
+              <button 
+                type="button"
+                style={{...styles.button, ...styles.secondaryButton}}
+                onClick={closePasswordModal}
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit"
+                style={{...styles.button, ...styles.primaryButton}}
+              >
+                Update Password
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     );
   };
 
@@ -260,7 +479,10 @@ function Settings() {
           <div style={{ ...styles.settingRow, display: 'block' }}>
             <h3 style={styles.settingLabel}>Security</h3>
             <div style={styles.buttonGroup}>
-              <button style={{...styles.button, ...styles.primaryButton}}>
+              <button 
+                style={{...styles.button, ...styles.primaryButton}}
+                onClick={openPasswordModal}
+              >
                 Change Password
               </button>
               <button style={{...styles.button, ...styles.secondaryButton}}>
@@ -284,6 +506,8 @@ function Settings() {
           </button>
         </div>
       </div>
+
+      {renderPasswordModal()}
     </div>
   );
 }
