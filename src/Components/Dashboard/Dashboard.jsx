@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import propTypes from 'prop-types';
 import axios from 'axios';
-import './Dashboard.css'; // Make sure to use the matching CSS below
+import { Link } from 'react-router-dom';
+import './Dashboard.css';
 
 import { BACKEND_URL } from '../../constants';
+
+const axiosConfig = {
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  withCredentials: false
+};
 
 const RECEIVE_ACTION_ENDPOINT = `${BACKEND_URL}/manuscripts/receive_action`;
 const CREATE_MANUSCRIPT_ENDPOINT = `${BACKEND_URL}/manuscripts/create`;
@@ -21,7 +30,7 @@ function CreateManuscriptForm({ visible, cancel, setError, onSuccess }) {
     };
 
     axios
-      .put(CREATE_MANUSCRIPT_ENDPOINT, manuscriptData)
+      .put(CREATE_MANUSCRIPT_ENDPOINT, manuscriptData, axiosConfig)
       .then((response) => {
         console.log('Manuscript created successfully:', response.data);
         setTitle('');
@@ -134,7 +143,7 @@ function ManuscriptActionForm({
     };
 
     axios
-      .put(RECEIVE_ACTION_ENDPOINT, actionData)
+      .put(RECEIVE_ACTION_ENDPOINT, actionData, axiosConfig)
       .then((response) => {
         console.log('Action successful:', response.data);
         // Clear form
@@ -239,15 +248,43 @@ function Dashboard() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [manuscriptId, setManuscriptId] = useState('');
   const [manuscripts, setManuscripts] = useState([]);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   const fetchManuscript = () => {
+    if (!isAuthorized) return;
+    
     axios
-      .get(FETCH_MANUSCRIPT_ENDPOINT)
+      .get(FETCH_MANUSCRIPT_ENDPOINT, axiosConfig)
       .then(({ data }) => {
-        setManuscripts(data);
+        // Handle both array and single object responses
+        console.log("here");
+        const manuscriptsArray = Array.isArray(data) ? data : [data];
+        setManuscripts(manuscriptsArray);
+        console.log('Fetched manuscripts:', manuscriptsArray); // Debug log
       })
-      .catch((err) => setError(`Failed to retrieve manuscripts: ${err.message}`));
+      .catch((err) => {
+        console.error('Error fetching manuscripts:', err);
+        setError(`Failed to retrieve manuscripts: ${err.message}`);
+      });
   };
+
+  // Check user authorization
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || !['Editor', 'Managing Editor'].includes(user.roles[0])) {
+      setIsAuthorized(false);
+      setError('Please log in as an Editor or Managing Editor to view manuscripts.');
+      return;
+    }
+    setIsAuthorized(true);
+  }, []); // Only check authorization on mount
+
+  // Fetch manuscripts whenever authorization changes
+  useEffect(() => {
+    if (isAuthorized) {
+      fetchManuscript();
+    }
+  }, [isAuthorized]);
 
   const toggleActionForm = () => {
     setShowActionForm(!showActionForm);
@@ -269,69 +306,81 @@ function Dashboard() {
     setShowActionForm(true);
   };
 
-  useEffect(() => {
-    fetchManuscript();
-  }, []);
-
   return (
     <div className="dashboard-container">
       <h1>Manuscript Management</h1>
-      {error && <div className="error-message">{error}</div>}
+      {error && (
+        <div className="error-message">
+          {error}
+          {!localStorage.getItem('user') && (
+            <p>
+              <Link to="/login" className="login-link">Click here to log in</Link>
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="dashboard-buttons">
         <button onClick={toggleCreateForm}>
           {showCreateForm ? 'Cancel Create' : 'Create New Manuscript'}
         </button>
-        <button onClick={toggleActionForm}>
-          {showActionForm ? 'Cancel Action' : 'Perform Manuscript Action'}
-        </button>
+        {isAuthorized && (
+          <button onClick={toggleActionForm}>
+            {showActionForm ? 'Cancel Action' : 'Perform Manuscript Action'}
+          </button>
+        )}
       </div>
 
       <CreateManuscriptForm
         visible={showCreateForm}
-        cancel={toggleCreateForm}
+        cancel={() => setShowCreateForm(false)}
         setError={setError}
         onSuccess={handleManuscriptCreated}
       />
 
-      <ManuscriptActionForm
-        visible={showActionForm}
-        cancel={toggleActionForm}
-        setError={setError}
-        manuscriptId={manuscriptId}
-        setManuscriptId={setManuscriptId}
-      />
+      {isAuthorized && (
+        <>
+          <ManuscriptActionForm
+            visible={showActionForm}
+            cancel={() => setShowActionForm(false)}
+            setError={setError}
+            manuscriptId={manuscriptId}
+            setManuscriptId={setManuscriptId}
+          />
 
-      <div className="manuscripts-list">
-        <h2>All Manuscripts</h2>
-        <table className="manuscripts-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Title</th>
-              <th>Author</th>
-              <th>State</th>
-            </tr>
-          </thead>
-          <tbody>
-            {manuscripts.map((manuscript) => (
-              <tr key={manuscript.manu_id}>
-                <td>{manuscript.manu_id}</td>
-                <td>{manuscript.title}</td>
-                <td>{manuscript.author}</td>
-                <td>
-                  {/* Color-coded badge for each state */}
-                  <span
-                    className={`state-badge state-${manuscript.curr_state?.toLowerCase()}`}
-                  >
-                    {manuscript.curr_state}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          {manuscripts.length > 0 ? (
+            <div className="manuscripts-list">
+              <h2>All Manuscripts</h2>
+              <table className="manuscripts-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>State</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {manuscripts.map((manuscript) => (
+                    <tr key={manuscript.manu_id}>
+                      <td>{manuscript.manu_id}</td>
+                      <td>{manuscript.title}</td>
+                      <td>{manuscript.author}</td>
+                      <td>
+                        <span className={`state-badge state-${manuscript.curr_state?.toLowerCase()}`}>
+                          {manuscript.curr_state}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p>No manuscripts found.</p>
+          )}
+        </>
+      )}
     </div>
   );
 }

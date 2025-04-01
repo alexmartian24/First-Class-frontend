@@ -1,23 +1,16 @@
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import userEvent from '@testing-library/user-event'
 import App from './App';
-import "@testing-library/jest-dom";
-
-// import { homeHeader } from './App'
+import '@testing-library/jest-dom';
 
 describe('App', () => {
-  it('renders nav and home', async() => {
+  it('renders nav and home', async () => {
     render(<App />);
 
-    await screen.findByRole('heading');
-    await screen.findAllByRole('listitem');
-
-    expect(screen.getByRole('heading'))
-      .toHaveTextContent('Journal');
-      //.toHaveTextContent(homeHeader);
-
-    expect(screen.getAllByRole('listitem')).toHaveLength(5)
-    
-  })
+    // Check for navigation elements
+    expect(screen.getByText('Home')).toBeInTheDocument();
+    expect(screen.getByText('About')).toBeInTheDocument();
+    expect(screen.getByText('View All People')).toBeInTheDocument();
+    expect(screen.getByText('View All Submissions')).toBeInTheDocument();
+    expect(screen.getByText('Settings')).toBeInTheDocument();
+  });
 });

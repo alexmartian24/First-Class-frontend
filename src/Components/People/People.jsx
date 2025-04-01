@@ -173,7 +173,11 @@ function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form
+      className="add-person-form"
+      onSubmit={handleSubmit}
+      data-testid="add-person-form"
+    >
       <label htmlFor="name">Name</label>
       <input
         required
@@ -296,7 +300,11 @@ function Person({ person, fetchPeople, setError, onEdit }) {
         <button type="button" onClick={() => onEdit(person)}>
           <FontAwesomeIcon icon={faPencilAlt} />
         </button>
-        <button type="button" onClick={handleDelete}>
+        <button
+          type="button"
+          onClick={handleDelete}
+          data-testid={`delete-${email}`}
+        >
           <FontAwesomeIcon icon={faTrashAlt} />
         </button>
       </div>
@@ -316,27 +324,77 @@ Person.propTypes = {
   onEdit: PropTypes.func.isRequired,
 };
 
-// Convert the backend data structure (object keyed by email) to an array
-function peopleObjectToArray(data) {
-  if (!data) return [];
-  return Object.entries(data).map(([email, person]) => ({ ...person, email }));
-}
-
 function People() {
-  const [error, setError] = useState('');
   const [people, setPeople] = useState([]);
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [addingPerson, setAddingPerson] = useState(false);
   const [editingPerson, setEditingPerson] = useState(null);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  // Check user authorization
+  useEffect(() => {
+    const checkAuth = () => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user || !['Editor', 'Managing Editor'].includes(user.roles[0])) {
+        setIsAuthorized(false);
+        setError('Please log in as an Editor or Managing Editor to view people.');
+        setLoading(false);
+        return;
+      }
+      setIsAuthorized(true);
+    };
+
+    // Check initially
+    checkAuth();
+
+    // Listen for storage events (login/logout)
+    const handleStorageChange = (e) => {
+      if (e.key === 'user') {
+        checkAuth();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []); // Only check authorization on mount
+
+  // Fetch people whenever authorization changes
+  useEffect(() => {
+    if (isAuthorized) {
+      fetchPeople();
+    }
+  }, [isAuthorized]);
 
   // Fetch the people from the backend
   const fetchPeople = () => {
+    if (!isAuthorized) {
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
     axios
       .get(PEOPLE_READ_ENDPOINT, axiosConfig)
       .then(({ data }) => {
-        const peopleArray = peopleObjectToArray(data);
-        setPeople(peopleArray);
+        const peopleArray = Object.values(data);
+        // Check for people without roles and log them
+        const peopleWithoutRoles = peopleArray.filter(person => !person.roles || !person.roles.length);
+        if (peopleWithoutRoles.length > 0) {
+          const emails = peopleWithoutRoles.map(p => p.email).join(', ');
+          console.error('Data integrity issue: Found people without roles:', peopleWithoutRoles);
+          setError(`Warning: Found ${peopleWithoutRoles.length} people without roles (${emails}). Please contact system administrator.`);
+        }
+        
+        // Still normalize the data to prevent crashes
+        const normalizedPeople = peopleArray.map(person => ({
+          ...person,
+          roles: person.roles || [] // If roles is undefined, use empty array
+        }));
+        setPeople(normalizedPeople);
       })
       .catch((error) =>
         setError(`Failed to retrieve people: ${error.message}`)
@@ -344,85 +402,106 @@ function People() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
-    fetchPeople();
-  }, []);
-
-  // When clicking "Edit," set the editing person, hide the add form, and scroll to that spot
   const handleEditPerson = (person) => {
     setEditingPerson(person);
     setAddingPerson(false);
-
-    // Wait for React to render the edit form, then scroll to it
-    setTimeout(() => {
-      const element = document.getElementById(`edit-person-${person.email}`);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
   };
 
-  // Cancel editing
-  const handleCancelEdit = () => {
-    setEditingPerson(null);
+  const handleDeletePerson = (email) => {
+    if (window.confirm('Are you sure you want to delete this person?')) {
+      axios
+        .delete(PEOPLE_DELETE_ENDPOINT(email), axiosConfig)
+        .then(() => {
+          fetchPeople();
+        })
+        .catch((error) =>
+          setError(`Failed to delete person: ${error.message}`)
+        );
+    }
   };
 
   return (
-    <div className="wrapper">
+    <div className="people-container">
       <header>
-        <h1>View All People</h1>
-        <button
-          type="button"
-          onClick={() => {
-            setAddingPerson(true);
-            setEditingPerson(null);
-          }}
-        >
-          Add a Person
-        </button>
+        <h1>People</h1>
       </header>
+      
+      {error && (
+        <div className="error-message">
+          {error}
+          {!localStorage.getItem('user') && (
+            <p>
+              <Link to="/login" className="login-link">Click here to log in</Link>
+            </p>
+          )}
+        </div>
+      )}
 
-      {error && <ErrorMessage message={error} />}
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
+      <div className="people-actions">
+        <button onClick={() => setAddingPerson(true)}>
+          Add Person
+        </button>
+      </div>
+
+      <AddPersonForm
+        visible={addingPerson}
+        cancel={() => setAddingPerson(false)}
+        fetchPeople={fetchPeople}
+        setError={setError}
+      />
+
+      {isAuthorized && (
         <>
-          <AddPersonForm
-            visible={addingPerson}
-            cancel={() => setAddingPerson(false)}
+          <EditPersonForm
+            visible={!!editingPerson}
+            person={editingPerson}
+            cancel={() => setEditingPerson(null)}
             fetchPeople={fetchPeople}
             setError={setError}
           />
 
-          {/* 
-            Map over the people. If the current person is being edited,
-            show the EditPersonForm inline. Otherwise, show the Person card.
-          */}
-          {people.map((person) => {
-            if (editingPerson && editingPerson.email === person.email) {
-              return (
-                <div key={person.email} id={`edit-person-${person.email}`}>
-                  <EditPersonForm
-                    visible
-                    person={person}
-                    cancel={handleCancelEdit}
-                    fetchPeople={fetchPeople}
-                    setError={setError}
-                  />
-                </div>
-              );
-            } else {
-              return (
-                <Person
-                  key={person.email}
-                  person={person}
-                  fetchPeople={fetchPeople}
-                  setError={setError}
-                  onEdit={handleEditPerson}
-                />
-              );
-            }
-          })}
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <div className="people-list">
+              <table className="people-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Affiliation</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {people.map((person) => (
+                    <tr key={person.email} className="person-row">
+                      <td>
+                        <Link to={`/people/${encodeURIComponent(person.email)}/manuscripts`} className="person-name-link">
+                          {person.name}
+                        </Link>
+                      </td>
+                      <td>{person.email}</td>
+                      <td>{person.affiliation}</td>
+                      <td>{person.roles[0]}</td>
+                      <td className="person-actions">
+                        <button onClick={() => handleEditPerson(person)}>
+                          <FontAwesomeIcon icon={faPencilAlt} />
+                        </button>
+                        <button
+                          onClick={() => handleDeletePerson(person.email)}
+                          data-testid={`delete-${person.email}`}
+                        >
+                          <FontAwesomeIcon icon={faTrashAlt} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </>
       )}
     </div>

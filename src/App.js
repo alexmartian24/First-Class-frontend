@@ -8,14 +8,13 @@ import {
 
 import './App.css';
 
-
 import Navbar from './Components/Navbar/Navbar.jsx'; 
 import People from './Components/People/People.jsx';
-//import Submissions from './Components/Submissions/Submissions.jsx'
+import Login from './Components/Login/Login.jsx'
 import Dashboard from './Components/Dashboard/Dashboard.jsx';
-import Home from './Components/Home';
-import About from './Components/About';
-import Settings from './Components/settings';
+import Home from './Components/Home/Home.js';
+import About from './Components/About/About.jsx';
+import Settings from './Components/Settings/settings.jsx';
 
 
 function PersonPage() {
@@ -25,14 +24,14 @@ function PersonPage() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Navbar />
       <Routes>
          {/* <Route index element={ <h1>Journal</h1> } /> */}
         <Route path="/" element={<Home />} />
         <Route path="people" element={<People />} />
         <Route path="people/:email" element={<PersonPage />} />
-       {/* <Route path="submissions" element={<Submissions />} /> */}
+        <Route path="login" element={<Login />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path= "about" element={<About />} />
         <Route path= "settings" element={<Settings />} />
