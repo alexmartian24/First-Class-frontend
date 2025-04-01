@@ -1,77 +1,98 @@
 .about-container {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-  }
-  
-  .about-header {
-    margin-bottom: 2rem;
-  }
-  
-  .about-header h1 {
-    font-size: 2.2rem;
-    color: #333;
-  }
-  
-  .about-intro {
-    font-size: 1.1rem;
-    color: #555;
-  }
-  
-  .about-section {
-    margin-bottom: 2rem;
-    text-align: left;
-  }
-  
-  .about-section h2 {
-    font-size: 1.8rem;
-    color: #2575fc;
-    border-bottom: 2px solid #2575fc;
-    display: inline-block;
-    padding-bottom: 5px;
-    margin-bottom: 10px;
-  }
-  
-  .highlight {
-    color: #6a11cb;
-  }
-  
-  .features-list {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  .features-list li {
-    font-size: 1.1rem;
-    color: #444;
-    padding: 8px 0;
-    display: flex;
-    align-items: center;
-  }
-  
-  .features-list li::before {
-    content: "✔️";
-    color: #2575fc;
-    font-size: 1.3rem;
-    margin-right: 10px;
-  }
-  
-  .about-footer {
-    background: #f9f9f9;
-    padding: 1.5rem;
-    border-radius: 8px;
-  }
-  
-  .about-footer h2 {
-    font-size: 1.5rem;
-    color: #444;
-  }
-  
-  .about-footer p {
-    font-size: 1.1rem;
-    color: #666;
-  }
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.about-header {
+  margin-bottom: 2rem;
+}
+
+.about-header h1 {
+  font-size: 2.2rem;
+  color: #333;
+}
+
+.about-intro {
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.about-section {
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.about-section h2 {
+  font-size: 1.8rem;
+  color: #2575fc;
+  border-bottom: 2px solid #2575fc;
+  display: inline-block;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.highlight {
+  color: #6a11cb;
+}
+
+.features-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.features-list li {
+  font-size: 1.1rem;
+  color: #444;
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+}
+
+.features-list li::before {
+  content: "✔️";
+  color: #2575fc;
+  font-size: 1.3rem;
+  margin-right: 10px;
+}
+
+.about-footer {
+  background: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.about-footer h2 {
+  font-size: 1.5rem;
+  color: #444;
+}
+
+.about-footer p {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+/* New styles for footer button */
+.about-footer-button {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.write-journal-button {
+  display: inline-block;
+  background-color: #2575fc;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.write-journal-button:hover {
+  background-color: #6a11cb;
+}
