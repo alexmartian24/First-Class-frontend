@@ -17,6 +17,8 @@ const axiosConfig = {
 const RECEIVE_ACTION_ENDPOINT = `${BACKEND_URL}/manuscripts/receive_action`;
 const CREATE_MANUSCRIPT_ENDPOINT = `${BACKEND_URL}/manuscripts/create`;
 const FETCH_MANUSCRIPT_ENDPOINT = `${BACKEND_URL}/manuscripts`;
+const UPDATE_MANUSCRIPT_ENDPOINT = (id) => `${BACKEND_URL}/manuscripts/update/${encodeURIComponent(id)}`;
+const DELETE_MANUSCRIPT_ENDPOINT = (id) => `${BACKEND_URL}/manuscripts/${encodeURIComponent(id)}`;
 
 function CreateManuscriptForm({ visible, cancel, setError, onSuccess }) {
   const [title, setTitle] = useState('');
@@ -24,10 +26,7 @@ function CreateManuscriptForm({ visible, cancel, setError, onSuccess }) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const manuscriptData = {
-      title,
-      author,
-    };
+    const manuscriptData = { title, author };
 
     axios
       .put(CREATE_MANUSCRIPT_ENDPOINT, manuscriptData, axiosConfig)
@@ -39,15 +38,9 @@ function CreateManuscriptForm({ visible, cancel, setError, onSuccess }) {
       })
       .catch((error) => {
         if (!error.response) {
-          setError(
-            'Network error: Failed to reach server. Check your connection.'
-          );
+          setError('Network error: Failed to reach server. Check your connection.');
         } else {
-          setError(
-            `API error: ${
-              error.response.data.message || 'Unknown error occurred'
-            }`
-          );
+          setError(`API error: ${error.response.data.message || 'Unknown error occurred'}`);
         }
         console.error('API Error Details:', error);
       });
@@ -77,12 +70,8 @@ function CreateManuscriptForm({ visible, cancel, setError, onSuccess }) {
       />
 
       <div className="form-buttons">
-        <button type="button" onClick={cancel}>
-          Cancel
-        </button>
-        <button type="submit" onClick={handleSubmit}>
-          Create Manuscript
-        </button>
+        <button type="button" onClick={cancel}>Cancel</button>
+        <button type="submit" onClick={handleSubmit}>Create Manuscript</button>
       </div>
     </form>
   );
@@ -95,39 +84,95 @@ CreateManuscriptForm.propTypes = {
   onSuccess: propTypes.func,
 };
 
-function ManuscriptActionForm({
-  visible,
-  cancel,
-  setError,
-  manuscriptId,
-  setManuscriptId,
-}) {
+function EditManuscriptForm({ visible, manuscript, cancel, setError, fetchManuscripts }) {
+  const [title, setTitle] = useState(manuscript.title);
+  const [author, setAuthor] = useState(manuscript.author);
+
+  useEffect(() => {
+    if (manuscript) {
+      setTitle(manuscript.title);
+      setAuthor(manuscript.author);
+    }
+  }, [manuscript]);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const updatedData = { title, author };
+
+    axios
+      .put(UPDATE_MANUSCRIPT_ENDPOINT(manuscript.manu_id), updatedData, axiosConfig)
+      .then((response) => {
+        console.log('Manuscript updated successfully:', response.data);
+        cancel(); // close edit form after success
+        fetchManuscripts();
+      })
+      .catch((error) => {
+        if (!error.response) {
+          setError('Network error: Failed to reach server.');
+        } else {
+          setError(`API error: ${error.response.data.message || 'Unknown error occurred'}`);
+        }
+        console.error('API Error Details:', error);
+      });
+  };
+
+  if (!visible || !manuscript) return null;
+
+  return (
+    <form className="manuscript-form edit-form">
+      <h2>Edit Manuscript (ID: {manuscript.manu_id})</h2>
+      <label htmlFor="edit-title">Title</label>
+      <input
+        required
+        type="text"
+        id="edit-title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+
+      <label htmlFor="edit-author">Author</label>
+      <input
+        required
+        type="text"
+        id="edit-author"
+        value={author}
+        onChange={(e) => setAuthor(e.target.value)}
+      />
+
+      <div className="form-buttons">
+        <button type="button" onClick={cancel}>Cancel</button>
+        <button type="submit" onClick={handleSubmit}>Save Changes</button>
+      </div>
+    </form>
+  );
+}
+
+EditManuscriptForm.propTypes = {
+  visible: propTypes.bool.isRequired,
+  manuscript: propTypes.object,
+  cancel: propTypes.func.isRequired,
+  setError: propTypes.func.isRequired,
+  fetchManuscripts: propTypes.func.isRequired,
+};
+
+function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManuscriptId }) {
   const [currentState, setCurrentState] = useState('SUB');
   const [action, setAction] = useState('');
   const [referee, setReferee] = useState('');
 
   const stateTransitions = {
-    // Keep in this format so backend recognizes it
-    SUB: ['REJ', 'REV', 'WIT'], // Submitted -> Rejected, Review, Withdrawn
-    REV: ['REJ', 'AUR'], // Review -> Rejected, Author Revisions
-    AUR: ['REV'], // Author Revisions -> Review
-    CED: ['REV'], // Copy Edit -> Review
-    WIT: ['No actions available'], // Withdrawn -> No transitions
-    REJ: ['No actions available'], // Rejected -> No transitions
+    SUB: ['REJ', 'REV', 'WIT'],
+    REV: ['REJ', 'AUR'],
+    AUR: ['REV'],
+    CED: ['REV'],
+    WIT: ['No actions available'],
+    REJ: ['No actions available'],
   };
 
-  const changeManuscriptId = (event) => {
-    setManuscriptId(event.target.value);
-  };
-  const changeCurrentState = (event) => {
-    setCurrentState(event.target.value);
-  };
-  const changeAction = (event) => {
-    setAction(event.target.value);
-  };
-  const changeReferee = (event) => {
-    setReferee(event.target.value);
-  };
+  const changeManuscriptId = (event) => { setManuscriptId(event.target.value); };
+  const changeCurrentState = (event) => { setCurrentState(event.target.value); };
+  const changeAction = (event) => { setAction(event.target.value); };
+  const changeReferee = (event) => { setReferee(event.target.value); };
 
   const submitAction = (event) => {
     event.preventDefault();
@@ -146,18 +191,15 @@ function ManuscriptActionForm({
       .put(RECEIVE_ACTION_ENDPOINT, actionData, axiosConfig)
       .then((response) => {
         console.log('Action successful:', response.data);
-        // Clear form
         setManuscriptId('');
         setCurrentState('SUB');
         setAction('');
         setReferee('');
       })
       .catch((error) => {
-        setError(
-          `There was a problem performing the action: ${
-            error.response?.data?.message || error.message
-          }`
-        );
+        setError(`There was a problem performing the action: ${
+          error.response?.data?.message || error.message
+        }`);
       });
   };
 
@@ -202,14 +244,11 @@ function ManuscriptActionForm({
         <select required id="action" value={action} onChange={changeAction}>
           <option value="">Select an action...</option>
           {stateTransitions[currentState]?.map((act) => (
-            <option key={act} value={act}>
-              {act}
-            </option>
+            <option key={act} value={act}>{act}</option>
           ))}
         </select>
       </div>
 
-      {/* Only show referee field if action is 'ARF' */}
       {action === 'ARF' && (
         <div className="form-group">
           <label htmlFor="referee">Referee Email</label>
@@ -223,12 +262,8 @@ function ManuscriptActionForm({
       )}
 
       <div className="form-buttons">
-        <button type="button" onClick={cancel}>
-          Cancel
-        </button>
-        <button type="submit" onClick={submitAction}>
-          Submit Action
-        </button>
+        <button type="button" onClick={cancel}>Cancel</button>
+        <button type="submit" onClick={submitAction}>Submit Action</button>
       </div>
     </form>
   );
@@ -246,21 +281,18 @@ function Dashboard() {
   const [error, setError] = useState('');
   const [showActionForm, setShowActionForm] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingManuscript, setEditingManuscript] = useState(null);
   const [manuscriptId, setManuscriptId] = useState('');
   const [manuscripts, setManuscripts] = useState([]);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
-  const fetchManuscript = () => {
+  const fetchManuscripts = () => {
     if (!isAuthorized) return;
-    
     axios
       .get(FETCH_MANUSCRIPT_ENDPOINT, axiosConfig)
       .then(({ data }) => {
-        // Handle both array and single object responses
-        console.log("here");
         const manuscriptsArray = Array.isArray(data) ? data : [data];
         setManuscripts(manuscriptsArray);
-        console.log('Fetched manuscripts:', manuscriptsArray); // Debug log
       })
       .catch((err) => {
         console.error('Error fetching manuscripts:', err);
@@ -268,7 +300,7 @@ function Dashboard() {
       });
   };
 
-  // Check user authorization
+  // Check user authorization on mount
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user || !['Editor', 'Managing Editor'].includes(user.roles[0])) {
@@ -277,12 +309,11 @@ function Dashboard() {
       return;
     }
     setIsAuthorized(true);
-  }, []); // Only check authorization on mount
+  }, []);
 
-  // Fetch manuscripts whenever authorization changes
   useEffect(() => {
     if (isAuthorized) {
-      fetchManuscript();
+      fetchManuscripts();
     }
   }, [isAuthorized]);
 
@@ -302,8 +333,30 @@ function Dashboard() {
     if (newManuscriptId) {
       setManuscriptId(newManuscriptId);
     }
-    fetchManuscript();
+    fetchManuscripts();
     setShowActionForm(true);
+  };
+
+  const handleEdit = (manuscript) => {
+    setEditingManuscript(manuscript);
+  };
+
+  const handleDelete = (manuscript) => {
+    if (window.confirm(`Are you sure you want to delete manuscript ID ${manuscript.manu_id}?`)) {
+      axios
+        .delete(DELETE_MANUSCRIPT_ENDPOINT(manuscript.manu_id), axiosConfig)
+        .then((response) => {
+          console.log('Manuscript deleted:', response.data);
+          fetchManuscripts();
+        })
+        .catch((error) => {
+          setError(`Error deleting manuscript: ${error.response?.data?.message || error.message}`);
+        });
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingManuscript(null);
   };
 
   return (
@@ -338,6 +391,16 @@ function Dashboard() {
         onSuccess={handleManuscriptCreated}
       />
 
+      {editingManuscript && (
+        <EditManuscriptForm
+          visible={!!editingManuscript}
+          manuscript={editingManuscript}
+          cancel={cancelEdit}
+          setError={setError}
+          fetchManuscripts={fetchManuscripts}
+        />
+      )}
+
       {isAuthorized && (
         <>
           <ManuscriptActionForm
@@ -358,6 +421,7 @@ function Dashboard() {
                     <th>Title</th>
                     <th>Author</th>
                     <th>State</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -370,6 +434,12 @@ function Dashboard() {
                         <span className={`state-badge state-${manuscript.curr_state?.toLowerCase()}`}>
                           {manuscript.curr_state}
                         </span>
+                      </td>
+                      <td>
+                        <div className="action-buttons">
+                          <button onClick={() => handleEdit(manuscript)}>Edit</button>
+                          <button onClick={() => handleDelete(manuscript)}>Delete</button>
+                        </div>
                       </td>
                     </tr>
                   ))}

@@ -46,7 +46,7 @@ body {
 }
 
 .dashboard-buttons button:hover {
-  background: #3a2fb2; /* Slightly darker on hover */
+  background: #3a2fb2;
 }
 
 /* Error message styling */
@@ -63,26 +63,31 @@ body {
   margin: 0.5rem 0 0 0;
 }
 
-/* Form containers (Create / Action) */
+/* Form containers (Create / Action / Edit) */
 .manuscript-form,
 .manuscript-action-form {
   background-color: #fff;
   border-radius: 8px;
   padding: 2rem;
-  margin: 0 auto 2rem; /* Center, then 2rem bottom margin */
+  margin: 0 auto 2rem;
   max-width: 600px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
+.edit-form {
+  border: 2px solid #4a3fe2;
+}
+
 .manuscript-form h2,
-.manuscript-action-form h2 {
+.manuscript-action-form h2,
+.edit-form h2 {
   margin-top: 0;
   font-size: 1.5rem;
   margin-bottom: 1rem;
   color: #4a3fe2;
 }
 
-/* Labels & inputs inside forms */
+/* Labels & inputs */
 .manuscript-form label,
 .manuscript-action-form label {
   display: block;
@@ -112,7 +117,7 @@ body {
   border-color: #4a3fe2;
 }
 
-/* Form buttons (Cancel, Submit) */
+/* Form buttons */
 .form-buttons {
   display: flex;
   gap: 1rem;
@@ -128,7 +133,6 @@ body {
   font-size: 1rem;
 }
 
-/* Cancel button */
 .form-buttons button[type="button"] {
   background: #f0f0f0;
   color: #333;
@@ -138,7 +142,6 @@ body {
   background: #e0e0e0;
 }
 
-/* Submit button */
 .form-buttons button[type="submit"] {
   background: #4a3fe2;
   color: white;
@@ -173,7 +176,6 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* Gradient header row */
 .manuscripts-table thead {
   background: linear-gradient(to right, #4a3fe2, #6f63ff);
   color: #fff;
@@ -187,17 +189,15 @@ body {
   border-bottom: 1px solid #eee;
 }
 
-/* Subtle row hover effect */
 .manuscripts-table tbody tr:hover {
   background-color: #f7f7ff;
 }
 
-/* Remove bottom border on last row */
 .manuscripts-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-/* ============= STATE BADGES ============= */
+/* State badges */
 .state-badge {
   display: inline-block;
   padding: 0.35rem 0.6rem;
@@ -208,35 +208,55 @@ body {
   letter-spacing: 0.5px;
 }
 
-/* Example color-coding by state: SUB, REV, AUR, CED, WIT, REJ */
 .state-sub {
-  background-color: #e5f9f0; /* Light greenish */
+  background-color: #e5f9f0;
   color: #1aa179;
 }
 
 .state-rev {
-  background-color: #fff6e5; /* Light yellowish */
+  background-color: #fff6e5;
   color: #db9c00;
 }
 
 .state-aur {
-  background-color: #e8f4ff; /* Light blueish */
+  background-color: #e8f4ff;
   color: #007acc;
 }
 
 .state-ced {
-  background-color: #ede5ff; /* Light purple */
+  background-color: #ede5ff;
   color: #6c3fcf;
 }
 
 .state-wit {
-  background-color: #f3f3f3; /* Light gray */
+  background-color: #f3f3f3;
   color: #555;
 }
 
 .state-rej {
-  background-color: #ffe5e5; /* Light red/pink */
+  background-color: #ffe5e5;
   color: #e53935;
+}
+
+/* Action buttons in table */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-buttons button {
+  background: #4a3fe2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.action-buttons button:hover {
+  background: #3a2fb2;
 }
 
 .login-link {
