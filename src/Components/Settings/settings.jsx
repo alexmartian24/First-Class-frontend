@@ -1,4 +1,19 @@
 import React, { useState } from "react";
+import axios from 'axios';
+import { BACKEND_URL } from '../../constants';
+
+// Axios configuration for cross-origin requests - same as in People.jsx
+const axiosConfig = {
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  },
+  withCredentials: false,
+};
+
+// Use the same people update endpoint as in People.jsx
+const PEOPLE_UPDATE_ENDPOINT = (email) =>
+  `${BACKEND_URL}/people/update/${encodeURIComponent(email)}`;
 
 function Settings() {
   const [notifications, setNotifications] = useState(true);
@@ -12,6 +27,7 @@ function Settings() {
   });
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toggleNotifications = () => {
     setNotifications(!notifications);
@@ -26,6 +42,13 @@ function Settings() {
   };
 
   const openPasswordModal = () => {
+    // Check if user is logged in
+    const user = localStorage.getItem('user');
+    if (!user) {
+      alert("You must be logged in to change your password");
+      return;
+    }
+    
     setShowPasswordModal(true);
     // Reset form state when opening modal
     setPasswords({ current: "", new: "", confirm: "" });
@@ -49,35 +72,101 @@ function Settings() {
     e.preventDefault();
     setPasswordError("");
     setPasswordSuccess("");
+    setIsSubmitting(true);
 
     // Simple validation
     if (!passwords.current || !passwords.new || !passwords.confirm) {
       setPasswordError("All fields are required");
+      setIsSubmitting(false);
       return;
     }
 
     if (passwords.new !== passwords.confirm) {
       setPasswordError("New passwords don't match");
+      setIsSubmitting(false);
       return;
     }
 
     if (passwords.new.length < 8) {
       setPasswordError("Password must be at least 8 characters long");
+      setIsSubmitting(false);
       return;
     }
 
-    // This is where you would typically make an API call to update the password
-    // For demonstration, we'll just simulate a successful password change
-    setTimeout(() => {
-      setPasswordSuccess("Password successfully changed!");
-      // Reset form after success
-      setPasswords({ current: "", new: "", confirm: "" });
-      
-      // Close modal after 2 seconds
-      setTimeout(() => {
-        closePasswordModal();
-      }, 2000);
-    }, 1000);
+    // Get the current user from localStorage
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    if (!user || !user.email) {
+      setPasswordError("You must be logged in to change your password");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // First verify the current password using the login endpoint
+    const verifyPayload = {
+      email: user.email,
+      password: passwords.current
+    };
+
+    console.log("=== PASSWORD CHANGE DEBUG INFO ===");
+    console.log("User from localStorage:", JSON.stringify(user, null, 2));
+    console.log("Login verification payload:", JSON.stringify(verifyPayload, null, 2));
+    console.log("Login endpoint:", `${BACKEND_URL}/people/login`);
+    console.log("Current password entered:", passwords.current);
+    console.log("New password entered:", passwords.new);
+    console.log("Confirmation password entered:", passwords.confirm);
+    console.log("===================================");
+    
+    // Use the login endpoint to verify current password
+    axios
+      .post(`${BACKEND_URL}/people/login`, verifyPayload, axiosConfig)
+      .then(() => {
+        // Password verified, now update with the new password
+        console.log("Current password verified, proceeding with update");
+        
+        // Prepare update payload
+        const updatedPerson = {
+          name: user.name,
+          email: user.email,
+          affiliation: user.affiliation,
+          role: user.roles && user.roles.length > 0 ? user.roles[0] : '',
+          password: passwords.new
+        };
+        
+        console.log("=== PASSWORD UPDATE INFO ===");
+        console.log("Update payload:", updatedPerson);
+        console.log("Update endpoint:", PEOPLE_UPDATE_ENDPOINT(user.email));
+        console.log("=============================");
+        
+        // Make the API call to update the person with the new password
+        return axios.put(PEOPLE_UPDATE_ENDPOINT(user.email), updatedPerson, axiosConfig);
+      })
+      .then(() => {
+        console.log("Password update successful");
+        setPasswordSuccess("Password successfully changed!");
+        
+        // Reset form after success
+        setPasswords({ current: "", new: "", confirm: "" });
+        
+        // Close modal after 2 seconds
+        setTimeout(() => {
+          closePasswordModal();
+        }, 2000);
+      })
+      .catch((error) => {
+        console.error("Operation failed:", error);
+        
+        // Handle login verification failures
+        if (error.response && error.response.status === 401) {
+          setPasswordError("Current password is incorrect");
+        } else {
+          // Handle other errors
+          setPasswordError(`Failed to update password: ${error.message}`);
+        }
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   // Inline styles to avoid requiring external CSS
@@ -410,14 +499,16 @@ function Settings() {
                 type="button"
                 style={{...styles.button, ...styles.secondaryButton}}
                 onClick={closePasswordModal}
+                disabled={isSubmitting}
               >
                 Cancel
               </button>
               <button 
                 type="submit"
                 style={{...styles.button, ...styles.primaryButton}}
+                disabled={isSubmitting}
               >
-                Update Password
+                {isSubmitting ? 'Updating...' : 'Update Password'}
               </button>
             </div>
           </form>
