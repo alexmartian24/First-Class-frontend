@@ -6,6 +6,9 @@ import './Dashboard.css';
 
 import { BACKEND_URL } from '../../constants';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+
 const axiosConfig = {
   headers: {
     'Content-Type': 'application/json',
@@ -437,8 +440,12 @@ function Dashboard() {
                       </td>
                       <td>
                         <div className="action-buttons">
-                          <button onClick={() => handleEdit(manuscript)}>Edit</button>
-                          <button onClick={() => handleDelete(manuscript)}>Delete</button>
+                          <button onClick={() => handleEdit(manuscript)}>
+                            <FontAwesomeIcon icon={faPencilAlt} />
+                          </button>
+                          <button onClick={() => handleDelete(manuscript)}>
+                            <FontAwesomeIcon icon={faTrashAlt} />
+                          </button>
                         </div>
                       </td>
                     </tr>

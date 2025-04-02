@@ -245,18 +245,24 @@ body {
 }
 
 .action-buttons button {
-  background: #4a3fe2;
-  color: #fff;
+  background: transparent;
   border: none;
-  border-radius: 4px;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.8rem;
+  padding: 6px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  border-radius: 4px;
+  transition: background-color 0.2s;
 }
 
 .action-buttons button:hover {
-  background: #3a2fb2;
+  background-color: #e9ecef;
+}
+
+.action-buttons button:first-child {
+  color: #3742fa;  /* Edit button color */
+}
+
+.action-buttons button:last-child {
+  color: #dc3545;  /* Delete button color */
 }
 
 .login-link {
