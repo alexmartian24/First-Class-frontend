@@ -30,6 +30,21 @@
     const [newEmail, setNewEmail] = useState('');
     const [affiliation, setAffiliation] = useState('');
     const [role, setRole] = useState('');
+    const [availableRoles, setAvailableRoles] = useState([]);
+
+    useEffect(() => {
+      // Fetch roles from backend
+      axios
+      .get(`${BACKEND_URL}/roles`, axiosConfig)
+      .then((response) => {
+        // Convert the roles object to an array of role names
+        const rolesArray = Object.values(response.data);
+        setAvailableRoles(rolesArray);
+      })
+      .catch((error) => {
+        console.error('Error fetching roles:', error);
+      });    
+    }, []);
 
     useEffect(() => {
       if (person) {
@@ -106,13 +121,9 @@
           onChange={(e) => setRole(e.target.value)}
         >
           <option value="">Select a role</option>
-          <option value="Author">Author</option>
-          <option value="Consulting Editor">Consulting Editor</option>
-          <option value="Copy Editor">Copy Editor</option>
-          <option value="Editor">Editor</option>
-          <option value="Managing Editor">Managing Editor</option>
-          <option value="Referee">Referee</option>
-          <option value="Typesetter">Typesetter</option>
+          {availableRoles.map((r) => (
+            <option key={r} value={r}>{r}</option>
+          ))}
         </select>
 
         <div className="form-buttons">
@@ -143,7 +154,22 @@
     const [email, setEmail] = useState('');
     const [affiliation, setAffiliation] = useState('');
     const [role, setRole] = useState('');
+    const [availableRoles, setAvailableRoles] = useState([]);
     const [password, setPassword] = useState('');
+
+    // Fetch the list of roles from the backend
+    useEffect(() => {
+      axios
+      .get(`${BACKEND_URL}/roles`, axiosConfig)
+      .then((response) => {
+        // Convert the roles object to an array of role names
+        const rolesArray = Object.values(response.data);
+        setAvailableRoles(rolesArray);
+      })
+      .catch((error) => {
+        console.error('Error fetching roles:', error);
+      });    
+    }, []);
 
     if (!visible) return null;
 
@@ -213,13 +239,9 @@
           onChange={(e) => setRole(e.target.value)}
         >
           <option value="">Select a role</option>
-          <option value="Author">Author</option>
-          <option value="Consulting Editor">Consulting Editor</option>
-          <option value="Copy Editor">Copy Editor</option>
-          <option value="Editor">Editor</option>
-          <option value="Managing Editor">Managing Editor</option>
-          <option value="Referee">Referee</option>
-          <option value="Typesetter">Typesetter</option>
+          {availableRoles.map((r) => (
+            <option key={r} value={r}>{r}</option>
+          ))}
         </select>
 
         <label htmlFor="password">Password</label>

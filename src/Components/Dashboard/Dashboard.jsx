@@ -159,21 +159,35 @@ EditManuscriptForm.propTypes = {
 };
 
 function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManuscriptId }) {
+  // Use "SUB" as default, since in query.py SUBMITTED is defined as "SUB"
   const [currentState, setCurrentState] = useState('SUB');
   const [action, setAction] = useState('');
   const [referee, setReferee] = useState('');
+  const [actionMapping, setActionMapping] = useState({});
 
-  const stateTransitions = {
-    SUB: ['REJ', 'REV', 'WIT'],
-    REV: ['REJ', 'AUR'],
-    AUR: ['REV'],
-    CED: ['REV'],
-    WIT: ['No actions available'],
-    REJ: ['No actions available'],
-  };
+  // Fetch the state transitions mapping from the backend
+  useEffect(() => {
+    axios
+      .get(`${BACKEND_URL}/manuscripts/state_transitions`, axiosConfig)
+      .then((response) => {
+        console.log("Fetched state transitions:", response.data);  // Debug: log mapping
+        setActionMapping(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching state transitions:", error);
+      });
+  }, []);
+
+  // Derive available states from the fetched mapping; fallback uses state codes.
+  const availableStates = Object.keys(actionMapping).length > 0
+    ? Object.keys(actionMapping)
+    : ['SUB', 'REV', 'AUR', 'CED', 'WIT', 'REJ'];
 
   const changeManuscriptId = (event) => { setManuscriptId(event.target.value); };
-  const changeCurrentState = (event) => { setCurrentState(event.target.value); };
+  const changeCurrentState = (event) => {
+    setCurrentState(event.target.value);
+    setAction(''); // Reset action when state changes
+  };
   const changeAction = (event) => { setAction(event.target.value); };
   const changeReferee = (event) => { setReferee(event.target.value); };
 
@@ -195,7 +209,8 @@ function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManu
       .then((response) => {
         console.log('Action successful:', response.data);
         setManuscriptId('');
-        setCurrentState('SUB');
+        // Reset current state to first available state from the mapping
+        setCurrentState(availableStates[0] || 'SUB');
         setAction('');
         setReferee('');
       })
@@ -233,12 +248,9 @@ function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManu
           value={currentState}
           onChange={changeCurrentState}
         >
-          <option value="SUB">Submitted</option>
-          <option value="REV">Under Review</option>
-          <option value="AUR">Author Revision</option>
-          <option value="CED">Copy Edit</option>
-          <option value="WIT">Withdrawn</option>
-          <option value="REJ">Rejected</option>
+          {availableStates.map((state) => (
+            <option key={state} value={state}>{state}</option>
+          ))}
         </select>
       </div>
 
@@ -246,9 +258,13 @@ function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManu
         <label htmlFor="action">Action</label>
         <select required id="action" value={action} onChange={changeAction}>
           <option value="">Select an action...</option>
-          {stateTransitions[currentState]?.map((act) => (
-            <option key={act} value={act}>{act}</option>
-          ))}
+          {actionMapping[currentState] && actionMapping[currentState].length > 0 ? (
+            actionMapping[currentState].map((act) => (
+              <option key={act} value={act}>{act}</option>
+            ))
+          ) : (
+            <option value="">No actions available</option>
+          )}
         </select>
       </div>
 
