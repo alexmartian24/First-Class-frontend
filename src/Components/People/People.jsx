@@ -421,7 +421,8 @@ function People() {
 
   const checkAuth = () => {
     const user = JSON.parse(localStorage.getItem('user'));
-    if (!user || !['Editor', 'Managing Editor'].includes(user.roles[0])) {
+    console.log(user);
+    if (!user || !['ED', 'ME'].includes(user.roles[0])) {
       setIsAuthorized(false);
       setError('Please log in as an Editor or Managing Editor to view people.');
       setLoading(false);

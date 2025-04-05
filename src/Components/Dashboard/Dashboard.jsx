@@ -21,7 +21,7 @@ const RECEIVE_ACTION_ENDPOINT = `${BACKEND_URL}/manuscripts/receive_action`;
 const CREATE_MANUSCRIPT_ENDPOINT = `${BACKEND_URL}/manuscripts/create`;
 const FETCH_MANUSCRIPT_ENDPOINT = `${BACKEND_URL}/manuscripts`;
 const UPDATE_MANUSCRIPT_ENDPOINT = (id) => `${BACKEND_URL}/manuscripts/update/${encodeURIComponent(id)}`;
-const DELETE_MANUSCRIPT_ENDPOINT = (id) => `${BACKEND_URL}/manuscripts/${encodeURIComponent(id)}`;
+const DELETE_MANUSCRIPT_ENDPOINT = (id) => `${BACKEND_URL}/manuscripts/delete/${encodeURIComponent(id)}`;
 
 function CreateManuscriptForm({ visible, cancel, setError, onSuccess }) {
   const [title, setTitle] = useState('');
@@ -181,7 +181,7 @@ function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManu
   // Derive available states from the fetched mapping; fallback uses state codes.
   const availableStates = Object.keys(actionMapping).length > 0
     ? Object.keys(actionMapping)
-    : ['SUB', 'REV', 'AUR', 'CED', 'WIT', 'REJ'];
+    : ['IRS', 'REV', 'AUR', 'CED', 'FMT', 'PUB', 'REJ', 'WIT', 'EDR'];
 
   const changeManuscriptId = (event) => { setManuscriptId(event.target.value); };
   const changeCurrentState = (event) => {
@@ -322,7 +322,7 @@ function Dashboard() {
   // Check user authorization on mount
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
-    if (!user || !['Editor', 'Managing Editor'].includes(user.roles[0])) {
+    if (!user || !['ED', 'ME'].includes(user.roles[0])) {
       setIsAuthorized(false);
       setError('Please log in as an Editor or Managing Editor to view manuscripts.');
       return;
