@@ -15,7 +15,7 @@ import Dashboard from './Components/Dashboard/Dashboard.jsx';
 import Home from './Components/Home/Home.js';
 import About from './Components/About/About.jsx';
 import Settings from './Components/Settings/settings.jsx';
-
+import { AuthProvider } from './context/AuthContext';
 
 function PersonPage() {
   const { email } = useParams();
@@ -24,19 +24,20 @@ function PersonPage() {
 
 function App() {
   return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Navbar />
-      <Routes>
-         {/* <Route index element={ <h1>Journal</h1> } /> */}
-        <Route path="/" element={<Home />} />
-        <Route path="people" element={<People />} />
-        <Route path="people/:email" element={<PersonPage />} />
-        <Route path="login" element={<Login />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path= "about" element={<About />} />
-        <Route path= "settings" element={<Settings />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="people" element={<People />} />
+          <Route path="people/:email" element={<PersonPage />} />
+          <Route path="login" element={<Login />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path= "about" element={<About />} />
+          <Route path= "settings" element={<Settings />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

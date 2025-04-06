@@ -20,8 +20,27 @@ const axiosConfig = {
 const RECEIVE_ACTION_ENDPOINT = `${BACKEND_URL}/manuscripts/receive_action`;
 const CREATE_MANUSCRIPT_ENDPOINT = `${BACKEND_URL}/manuscripts/create`;
 const FETCH_MANUSCRIPT_ENDPOINT = `${BACKEND_URL}/manuscripts`;
-const UPDATE_MANUSCRIPT_ENDPOINT = (id) => `${BACKEND_URL}/manuscripts/update/${encodeURIComponent(id)}`;
 const DELETE_MANUSCRIPT_ENDPOINT = (id) => `${BACKEND_URL}/manuscripts/delete/${encodeURIComponent(id)}`;
+
+// Map state codes to human-readable names
+const STATE_NAMES = {
+  // States
+  'SUB': 'Submitted',
+  'AUR': 'Author Review',
+  'CED': 'Copy Editing',
+  'EDR': 'Editor Review',
+  'FMT': 'Formatting',
+  'REV': 'In Referee Review',
+  'PUB': 'Published',
+  'REJ': 'Rejected',
+  'WIT': 'Withdrawn',
+  // Actions
+  'ARF': 'Assign Referee',
+  'DRF': 'Delete Referee',
+  'ACC': 'Accept',
+  'DON': 'Done',
+  'EMV': 'Editor Move',
+};
 
 function CreateManuscriptForm({ visible, cancel, setError, onSuccess }) {
   const [title, setTitle] = useState('');
@@ -37,7 +56,7 @@ function CreateManuscriptForm({ visible, cancel, setError, onSuccess }) {
         console.log('Manuscript created successfully:', response.data);
         setTitle('');
         setAuthor('');
-        if (onSuccess) onSuccess(response.data.Return);
+        if (onSuccess) onSuccess();
       })
       .catch((error) => {
         if (!error.response) {
@@ -87,26 +106,48 @@ CreateManuscriptForm.propTypes = {
   onSuccess: propTypes.func,
 };
 
-function EditManuscriptForm({ visible, manuscript, cancel, setError, fetchManuscripts }) {
-  const [title, setTitle] = useState(manuscript.title);
-  const [author, setAuthor] = useState(manuscript.author);
+function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscripts }) {
+  // Initialize with manuscript ID if provided
+  const manuscriptId = manuscript?.manu_id || '';
+  const currentState = manuscript?.curr_state || '';
+  const [newState, setNewState] = useState('');
+  const [refereeEmail, setRefereeEmail] = useState('');
+
+  const [actionMapping, setActionMapping] = useState({});
+  
+  // Fetch available actions from backend
+  useEffect(() => {
+    axios
+      .get(`${BACKEND_URL}/manuscripts/state_transitions`, axiosConfig)
+      .then((response) => {
+        setActionMapping(response.data);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch action mapping:', error);
+        setError('Failed to load available state transitions');
+      });
+  }, []);
 
   useEffect(() => {
     if (manuscript) {
-      setTitle(manuscript.title);
-      setAuthor(manuscript.author);
+      setNewState(''); // Reset new state when manuscript changes
     }
   }, [manuscript]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const updatedData = { title, author };
+    const actionData = {
+      manu_id: manuscriptId,
+      curr_state: currentState,
+      action: newState,
+      referee: refereeEmail || undefined,
+    };
 
     axios
-      .put(UPDATE_MANUSCRIPT_ENDPOINT(manuscript.manu_id), updatedData, axiosConfig)
+      .put(RECEIVE_ACTION_ENDPOINT, actionData, axiosConfig)
       .then((response) => {
-        console.log('Manuscript updated successfully:', response.data);
-        cancel(); // close edit form after success
+        console.log('Manuscript state updated:', response.data);
+        cancel();
         fetchManuscripts();
       })
       .catch((error) => {
@@ -119,38 +160,90 @@ function EditManuscriptForm({ visible, manuscript, cancel, setError, fetchManusc
       });
   };
 
-  if (!visible || !manuscript) return null;
+  // Get available actions for current state from backend mapping
+  const availableActions = currentState && actionMapping[currentState] ? actionMapping[currentState] : [];
+
+  if (!visible) return null;
 
   return (
-    <form className="manuscript-form edit-form">
-      <h2>Edit Manuscript (ID: {manuscript.manu_id})</h2>
-      <label htmlFor="edit-title">Title</label>
-      <input
-        required
-        type="text"
-        id="edit-title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+    <form className="manuscript-form state-form">
+      <h2>Change Manuscript State</h2>
 
-      <label htmlFor="edit-author">Author</label>
-      <input
-        required
-        type="text"
-        id="edit-author"
-        value={author}
-        onChange={(e) => setAuthor(e.target.value)}
-      />
+      <div className="form-group">
+        <label htmlFor="manuscriptId">Manuscript ID</label>
+        <input
+          type="text"
+          id="manuscriptId"
+          value={manuscriptId}
+          readOnly
+          className="readonly-field"
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="currentState">Current State</label>
+        <input
+          type="text"
+          id="currentState"
+          value={STATE_NAMES[currentState] || currentState}
+          readOnly
+          className="readonly-field"
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="newState">New State</label>
+        <select
+          required
+          id="newState"
+          value={newState}
+          onChange={(e) => {
+            setNewState(e.target.value);
+            // Clear referee email when changing state unless it's DRF/ARF
+            if (e.target.value !== 'DRF' && e.target.value !== 'ARF') {
+              setRefereeEmail('');
+            }
+          }}
+        >
+          <option value="">Select action</option>
+          {availableActions.map((action) => (
+            <option key={action} value={action}>
+              {STATE_NAMES[action] || action}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Only show referee email field for DRF/ARF states */}
+      {(newState === 'DRF' || newState === 'ARF') && (
+        <div className="form-group">
+          <label htmlFor="refereeEmail">Referee Email</label>
+          <input
+            type="email"
+            id="refereeEmail"
+            value={refereeEmail}
+            onChange={(e) => setRefereeEmail(e.target.value)}
+            placeholder="Enter referee email"
+            required
+          />
+        </div>
+      )}
 
       <div className="form-buttons">
         <button type="button" onClick={cancel}>Cancel</button>
-        <button type="submit" onClick={handleSubmit}>Save Changes</button>
+        <button 
+          type="submit" 
+          onClick={handleSubmit}
+          disabled={!manuscriptId || !currentState || !newState}
+        >
+          Change State
+        </button>
       </div>
     </form>
   );
 }
 
-EditManuscriptForm.propTypes = {
+ChangeStateForm.propTypes = {
   visible: propTypes.bool.isRequired,
   manuscript: propTypes.object,
   cancel: propTypes.func.isRequired,
@@ -181,7 +274,7 @@ function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManu
   // Derive available states from the fetched mapping; fallback uses state codes.
   const availableStates = Object.keys(actionMapping).length > 0
     ? Object.keys(actionMapping)
-    : ['IRS', 'REV', 'AUR', 'CED', 'FMT', 'PUB', 'REJ', 'WIT', 'EDR'];
+    : ['SUB', 'REV', 'AUR', 'CED', 'FMT', 'PUB', 'REJ', 'WIT', 'EDR'];
 
   const changeManuscriptId = (event) => { setManuscriptId(event.target.value); };
   const changeCurrentState = (event) => {
@@ -268,9 +361,9 @@ function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManu
         </select>
       </div>
 
-      {action === 'ARF' && (
+      {(action === 'ARF' || action === 'DRF') && (
         <div className="form-group">
-          <label htmlFor="referee">Referee Email</label>
+          <label htmlFor="referee">{action === 'ARF' ? 'Referee Email to Add' : 'Referee Email to Remove'}</label>
           <input
             type="email"
             id="referee"
@@ -298,10 +391,8 @@ ManuscriptActionForm.propTypes = {
 
 function Dashboard() {
   const [error, setError] = useState('');
-  const [showActionForm, setShowActionForm] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingManuscript, setEditingManuscript] = useState(null);
-  const [manuscriptId, setManuscriptId] = useState('');
   const [manuscripts, setManuscripts] = useState([]);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
@@ -336,24 +427,16 @@ function Dashboard() {
     }
   }, [isAuthorized]);
 
-  const toggleActionForm = () => {
-    setShowActionForm(!showActionForm);
-    setShowCreateForm(false);
-  };
+
 
   const toggleCreateForm = () => {
     setShowCreateForm(!showCreateForm);
-    setShowActionForm(false);
   };
 
-  const handleManuscriptCreated = (newManuscriptId) => {
-    setShowCreateForm(false);
+  const handleManuscriptCreated = () => {
     setError('');
-    if (newManuscriptId) {
-      setManuscriptId(newManuscriptId);
-    }
+    setShowCreateForm(false);
     fetchManuscripts();
-    setShowActionForm(true);
   };
 
   const handleEdit = (manuscript) => {
@@ -396,11 +479,6 @@ function Dashboard() {
         <button onClick={toggleCreateForm}>
           {showCreateForm ? 'Cancel Create' : 'Create New Manuscript'}
         </button>
-        {isAuthorized && (
-          <button onClick={toggleActionForm}>
-            {showActionForm ? 'Cancel Action' : 'Perform Manuscript Action'}
-          </button>
-        )}
       </div>
 
       <CreateManuscriptForm
@@ -411,7 +489,7 @@ function Dashboard() {
       />
 
       {editingManuscript && (
-        <EditManuscriptForm
+        <ChangeStateForm
           visible={!!editingManuscript}
           manuscript={editingManuscript}
           cancel={cancelEdit}
@@ -422,14 +500,6 @@ function Dashboard() {
 
       {isAuthorized && (
         <>
-          <ManuscriptActionForm
-            visible={showActionForm}
-            cancel={() => setShowActionForm(false)}
-            setError={setError}
-            manuscriptId={manuscriptId}
-            setManuscriptId={setManuscriptId}
-          />
-
           {manuscripts.length > 0 ? (
             <div className="manuscripts-list">
               <h2>All Manuscripts</h2>

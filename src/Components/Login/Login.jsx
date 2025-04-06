@@ -1,24 +1,14 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
-import { BACKEND_URL } from '../../constants';
-
-const LOGIN_ENDPOINT = `${BACKEND_URL}/people/login`;
-
-const axiosConfig = {
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  },
-  withCredentials: false
-};
+import { useAuth } from '../../context/AuthContext';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -30,16 +20,8 @@ function Login() {
     }
 
     try {
-      const response = await axios.post(LOGIN_ENDPOINT, {
-        email,
-        password
-      }, axiosConfig);
-
-      const user = response.data.Return;
-      localStorage.setItem('user', JSON.stringify(user));
-      // Dispatch custom event for same-tab updates
-      window.dispatchEvent(new Event('auth-change'));
-      navigate('/about');
+      await login(email, password);
+      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     }

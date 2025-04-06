@@ -17,6 +17,14 @@ body {
   padding-top: 100px;
 }
 
+/* Read-only fields */
+.readonly-field {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  color: #666;
+  cursor: not-allowed;
+}
+
 /* Page heading */
 .dashboard-container h1 {
   font-size: 2rem;

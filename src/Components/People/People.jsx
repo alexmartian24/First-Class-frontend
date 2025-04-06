@@ -1,13 +1,14 @@
-  import React, { useEffect, useState } from 'react';
-  import PropTypes from 'prop-types';
-  import axios from 'axios';
-  import { Link } from 'react-router-dom';
-  import './People.css';
+import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+import './People.css';
 
-  import { BACKEND_URL } from '../../constants';
+import { BACKEND_URL } from '../../constants';
+import { useAuth } from '../../context/AuthContext';
 
-  import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-  import { faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
   // Axios configuration for cross-origin requests
   const axiosConfig = {
@@ -417,42 +418,41 @@ function People() {
   const [loading, setLoading] = useState(true);
   const [addingPerson, setAddingPerson] = useState(false);
   const [editingPerson, setEditingPerson] = useState(null);
-  const [isAuthorized, setIsAuthorized] = useState(false);
-
-  const checkAuth = () => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    console.log(user);
-    if (!user || !['ED', 'ME'].includes(user.roles[0])) {
-      setIsAuthorized(false);
-      setError('Please log in as an Editor or Managing Editor to view people.');
-      setLoading(false);
-    } else {
-      setIsAuthorized(true);
-    }
-  };
+  const { user, isEditor } = useAuth();
 
   useEffect(() => {
-    checkAuth();
-  }, []);
+    if (!user || !isEditor()) {
+      setError('Please log in as an Editor or Managing Editor to view people.');
+      setLoading(false);
+      return;
+    }
+    fetchPeople();
+  }, [user, isEditor]);
 
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === 'user') {
-        checkAuth();
+        if (!user || !isEditor()) {
+          setError('Please log in as an Editor or Managing Editor to view people.');
+          setLoading(false);
+        } else {
+          fetchPeople();
+        }
       }
     };
     window.addEventListener('storage', handleStorageChange);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, []);
+  }, [user, isEditor]);
 
-  // Fetch people data when authorized
-  useEffect(() => {
-    if (isAuthorized) {
-      fetchPeople();
-    }
-  }, [isAuthorized]);
+  if (!user || !isEditor()) {
+    return (
+      <div className="people-container">
+        <div className="error-message">{error}</div>
+      </div>
+    );
+  }
 
   const fetchPeople = () => {
     setLoading(true);
@@ -481,7 +481,7 @@ function People() {
       .finally(() => setLoading(false));
   };
 
-  if (!isAuthorized) {
+  if (!user || !isEditor()) {
     return <ErrorMessage message={error} />;
   }
 
@@ -509,7 +509,7 @@ function People() {
         setError={setError}
       />
 
-      {isAuthorized && (
+      {user && isEditor() && (
         <>
           <EditPersonForm
             visible={!!editingPerson}

@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import propTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './Navbar.css';
 
-const PAGES = [
+const BASE_PAGES = [
   { label: 'Home', destination: '/' },
   { label: 'About', destination: '/about' },
-  { label: 'View All People', destination: '/people' },
-  { label: 'View All Submissions', destination: '/dashboard' },
+  { label: 'Dashboard', destination: '/dashboard' },
+];
+
+const EDITOR_PAGES = [
+  { label: 'People', destination: '/people' },
   { label: 'Settings', destination: '/settings' },
 ];
 
@@ -28,61 +32,34 @@ NavLink.propTypes = {
 };
 
 function Navbar() {
-  const [user, setUser] = useState(null);
-
-  // Check localStorage for user data on mount and when it changes
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-        } catch (e) {
-          console.error('Failed to parse user data:', e);
-          localStorage.removeItem('user');
-          setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
-    };
-
-    // Initial check
-    handleStorageChange();
-
-    // Listen for storage changes (from other tabs)
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Listen for custom auth events (from same tab)
-    window.addEventListener('auth-change', handleStorageChange);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('auth-change', handleStorageChange);
-    };
-  }, []); // Empty dependency array - only run on mount
+  const { user, logout, isEditor } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    setUser(null);
-    // Dispatch custom event for same-tab updates
-    window.dispatchEvent(new Event('auth-change'));
-    window.location.href = '/';
+    logout();
+    navigate('/login');
   };
+
+
+
+  const pages = [...BASE_PAGES];
+  if (user && isEditor()) {
+    pages.push(...EDITOR_PAGES);
+  }
 
   return (
     <nav className="navbar">
       <ul className="nav-list">
-        {PAGES.map((page) => (
+        {pages.map((page) => (
           <NavLink key={page.destination} page={page} />
         ))}
-        {user ? (
-          <li className="nav-item">
-            <button onClick={handleLogout} className="nav-link">Logout</button>
-          </li>
-        ) : (
-          <NavLink page={{ label: 'Login', destination: '/login' }} />
-        )}
+        <li className="nav-item">
+          {user ? (
+            <button onClick={handleLogout} className="nav-link">Logout ({user.name})</button>
+          ) : (
+            <Link to="/login" className="nav-link">Login</Link>
+          )}
+        </li>
       </ul>
     </nav>
   );
