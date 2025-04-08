@@ -50,7 +50,7 @@ export function AuthProvider({ children }) {
   };
 
   const isEditor = () => {
-    return user?.roles?.includes('Editor') || user?.roles?.includes('Managing Editor');
+    return user?.roles?.includes('ED') || user?.roles?.includes('ME');
   };
 
   const value = {
