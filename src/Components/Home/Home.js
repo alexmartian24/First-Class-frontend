@@ -48,7 +48,7 @@ function Home() {
             <Link to="/about" className="read-more-button">Read More</Link>
           </p>
           
-          <Link to="/people" className="cta-button">
+          <Link to="/login" className="cta-button">
             <span className="button-text">Get Started</span>
             <span className="button-icon">→</span>
           </Link>
