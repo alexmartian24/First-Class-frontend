@@ -3,6 +3,7 @@ import propTypes from 'prop-types';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './Dashboard.css';
+import { useAuth } from '../../context/AuthContext';
 
 import { BACKEND_URL } from '../../constants';
 
@@ -390,6 +391,7 @@ ManuscriptActionForm.propTypes = {
 };
 
 function Dashboard() {
+  const { isEditor, user } = useAuth();
   const [error, setError] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingManuscript, setEditingManuscript] = useState(null);
@@ -412,14 +414,13 @@ function Dashboard() {
 
   // Check user authorization on mount
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (!user || !['ED', 'ME'].includes(user.roles[0])) {
+    if (!user || !isEditor()) {
       setIsAuthorized(false);
       setError('Please log in as an Editor or Managing Editor to view manuscripts.');
       return;
     }
     setIsAuthorized(true);
-  }, []);
+  }, [user, isEditor]);
 
   useEffect(() => {
     if (isAuthorized) {
