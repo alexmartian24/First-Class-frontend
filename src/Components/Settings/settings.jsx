@@ -29,25 +29,33 @@ function Settings() {
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Debug: Log initial state when component renders (can be removed later)
+  console.debug("Settings component rendered - darkMode:", darkMode, "notifications:", notifications, "language:", language);
+
   const toggleNotifications = () => {
+    console.debug("Toggling notifications:", !notifications);
     setNotifications(!notifications);
   };
 
   const toggleDarkMode = () => {
+    console.debug("Toggling darkMode:", !darkMode);
     setDarkMode(!darkMode);
   };
 
   const handleLanguageChange = (e) => {
+    console.debug("Language changed to:", e.target.value);
     setLanguage(e.target.value);
   };
 
   const openPasswordModal = () => {
+    console.debug("Attempting to open password modal...");
     // Check if user is logged in
     const user = localStorage.getItem('user');
     if (!user) {
       alert("You must be logged in to change your password");
       return;
     }
+    console.debug("User found in localStorage.");
     
     setShowPasswordModal(true);
     // Reset form state when opening modal
@@ -57,11 +65,13 @@ function Settings() {
   };
 
   const closePasswordModal = () => {
+    console.debug("Closing password modal.");
     setShowPasswordModal(false);
   };
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
+    console.debug(`Password field "${name}" changed to:`, value);
     setPasswords(prev => ({
       ...prev,
       [name]: value
@@ -70,24 +80,28 @@ function Settings() {
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
+    console.debug("Submitting password change form with:", passwords);
     setPasswordError("");
     setPasswordSuccess("");
     setIsSubmitting(true);
 
     // Simple validation
     if (!passwords.current || !passwords.new || !passwords.confirm) {
+      console.debug("Validation failed: missing fields");
       setPasswordError("All fields are required");
       setIsSubmitting(false);
       return;
     }
 
     if (passwords.new !== passwords.confirm) {
+      console.debug("Validation failed: new passwords do not match");
       setPasswordError("New passwords don't match");
       setIsSubmitting(false);
       return;
     }
 
     if (passwords.new.length < 8) {
+      console.debug("Validation failed: new password too short");
       setPasswordError("Password must be at least 8 characters long");
       setIsSubmitting(false);
       return;
@@ -97,6 +111,7 @@ function Settings() {
     const user = JSON.parse(localStorage.getItem('user'));
     
     if (!user || !user.email) {
+      console.debug("User not logged in or missing email.");
       setPasswordError("You must be logged in to change your password");
       setIsSubmitting(false);
       return;
@@ -108,22 +123,20 @@ function Settings() {
       password: passwords.current
     };
 
-    console.log("=== PASSWORD CHANGE DEBUG INFO ===");
-    console.log("User from localStorage:", JSON.stringify(user, null, 2));
-    console.log("Login verification payload:", JSON.stringify(verifyPayload, null, 2));
-    console.log("Login endpoint:", `${BACKEND_URL}/people/login`);
-    console.log("Current password entered:", passwords.current);
-    console.log("New password entered:", passwords.new);
-    console.log("Confirmation password entered:", passwords.confirm);
-    console.log("===================================");
-    
+    console.debug("=== PASSWORD CHANGE DEBUG INFO ===");
+    console.debug("User from localStorage:", JSON.stringify(user, null, 2));
+    console.debug("Login verification payload:", JSON.stringify(verifyPayload, null, 2));
+    console.debug("Login endpoint:", `${BACKEND_URL}/people/login`);
+    console.debug("Current password entered:", passwords.current);
+    console.debug("New password entered:", passwords.new);
+    console.debug("Confirmation password entered:", passwords.confirm);
+    console.debug("===================================");
+
     // Use the login endpoint to verify current password
     axios
       .post(`${BACKEND_URL}/people/login`, verifyPayload, axiosConfig)
       .then(() => {
-        // Password verified, now update with the new password
-        console.log("Current password verified, proceeding with update");
-        
+        console.debug("Current password verified, proceeding with update");
         // Prepare update payload
         const updatedPerson = {
           name: user.name,
@@ -133,16 +146,16 @@ function Settings() {
           password: passwords.new
         };
         
-        console.log("=== PASSWORD UPDATE INFO ===");
-        console.log("Update payload:", updatedPerson);
-        console.log("Update endpoint:", PEOPLE_UPDATE_ENDPOINT(user.email));
-        console.log("=============================");
-        
+        console.debug("=== PASSWORD UPDATE INFO ===");
+        console.debug("Update payload:", updatedPerson);
+        console.debug("Update endpoint:", PEOPLE_UPDATE_ENDPOINT(user.email));
+        console.debug("=============================");
+
         // Make the API call to update the person with the new password
         return axios.put(PEOPLE_UPDATE_ENDPOINT(user.email), updatedPerson, axiosConfig);
       })
       .then(() => {
-        console.log("Password update successful");
+        console.debug("Password update successful");
         setPasswordSuccess("Password successfully changed!");
         
         // Reset form after success
@@ -576,7 +589,10 @@ function Settings() {
               >
                 Change Password
               </button>
-              <button style={{...styles.button, ...styles.secondaryButton}}>
+              <button 
+                style={{...styles.button, ...styles.secondaryButton}}
+                onClick={() => console.debug("Two-Factor Authentication clicked")}
+              >
                 Two-Factor Authentication
               </button>
             </div>
@@ -585,14 +601,20 @@ function Settings() {
           <div style={styles.dangerZone}>
             <h3 style={styles.dangerTitle}>Danger Zone</h3>
             <p style={styles.dangerDescription}>This action cannot be undone.</p>
-            <button style={{...styles.button, ...styles.dangerButton}}>
+            <button 
+              style={{...styles.button, ...styles.dangerButton}}
+              onClick={() => console.debug("Delete Account clicked")}
+            >
               Delete Account
             </button>
           </div>
         </section>
 
         <div style={styles.footer}>
-          <button style={{...styles.button, ...styles.primaryButton}}>
+          <button 
+            style={{...styles.button, ...styles.primaryButton}}
+            onClick={() => console.debug("Save Changes clicked")}
+          >
             Save Changes
           </button>
         </div>
