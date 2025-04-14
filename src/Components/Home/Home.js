@@ -1,57 +1,98 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
+import { BACKEND_URL } from '../../constants';
 import "./Home.css";
 
 function Home() {
-  const quotes = [
-    "Oh you're here? Why?",
-    "Oh welcome back, I forgot about you.",
-    "Why did you wake me up?",
-    "You again? What do you want?",
-    "I was having such a nice nap...",
-    "Did you really have to come back?",
-    "Hmph. I guess you have business here.",
-    "Ugh, fine. Let's get this over with.",
-    "You took your time, didn't you?",
-    "Welcome back… I guess."
-  ];
-
-  const [currentQuote, setCurrentQuote] = useState("");
+  const { isEditor } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [content, setContent] = useState({
+    title: "Journal",
+    description: "Welcome to Journal, your comprehensive platform for managing academic submissions, and interact with the system."
+  });
 
   useEffect(() => {
-    // Generate a new random quote on every page refresh
-    const randomIndex = Math.floor(Math.random() * quotes.length);
-    setCurrentQuote(quotes[randomIndex]);
+    // Fetch content from backend
+    const fetchContent = async () => {
+      try {
+        const response = await axios.get(`${BACKEND_URL}/text/home`);
+        if (response.data) {
+          setContent(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching home content:', error);
+      }
+    };
+    fetchContent();
   }, []);
+
+  const handleSave = async () => {
+    try {
+      await axios.put(`${BACKEND_URL}/text/home`, content, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving content:', error);
+    }
+  };
+
+  const handleEdit = (field, value) => {
+    setContent(prev => ({ ...prev, [field]: value }));
+  };
 
   return (
     <div className="home-container">
       <div className="hero-section">
         <div className="content-wrapper">
-          <h1 className="title">Journal</h1>
-          <div className="subtitle-line"></div>
-          
-          <p className="random-quote">
-            <span>&ldquo;{currentQuote}&rdquo;</span>
-          </p>
-
-          <p className="description">
-            Welcome to Journal, a platform where you can manage and explore
-            various submissions, people, and data records seamlessly. Whether
-            you&apos;re here to contribute, review, or browse, this tool is designed
-            to make your experience efficient and intuitive.
-          </p>
-          
-          <p className="action-text">
-            Click below to get started and explore the people database, manage
-            submissions, and interact with the system.
-            <Link to="/about" className="read-more-button">Read More</Link>
-          </p>
+          {isEditing ? (
+            <>
+              <input
+                type="text"
+                className="edit-title"
+                value={content.title}
+                onChange={(e) => handleEdit('title', e.target.value)}
+                placeholder="Enter title"
+              />
+              <textarea
+                className="edit-description"
+                value={content.description}
+                onChange={(e) => handleEdit('description', e.target.value)}
+                placeholder="Enter description"
+              />
+            </>
+          ) : (
+            <>
+              <h1 className="title">{content.title}</h1>
+              <div className="subtitle-line"></div>
+              <p className="description">
+                {content.description}
+                <Link to="/about" className="read-more-button">Read More</Link>
+              </p>
+            </>
+          )}
           
           <Link to="/login" className="cta-button">
             <span className="button-text">Get Started</span>
             <span className="button-icon">→</span>
           </Link>
+
+          {isEditor() && (
+            <div className="edit-controls">
+              {isEditing ? (
+                <>
+                  <button onClick={handleSave} className="save-button">Save Changes</button>
+                  <button onClick={() => setIsEditing(false)} className="cancel-button">Cancel</button>
+                </>
+              ) : (
+                <button onClick={() => setIsEditing(true)} className="edit-button">Edit Content</button>
+              )}
+            </div>
+          )}
         </div>
         
         <div className="visual-element">

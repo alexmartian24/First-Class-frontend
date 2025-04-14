@@ -15,6 +15,7 @@ import Dashboard from './Components/Dashboard/Dashboard.jsx';
 import Home from './Components/Home/Home.js';
 import About from './Components/About/About.jsx';
 import Settings from './Components/Settings/settings.jsx';
+import Masthead from './Components/Masthead/Masthead.jsx';
 import { AuthProvider } from './context/AuthContext';
 
 function PersonPage() {
@@ -35,6 +36,7 @@ function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path= "about" element={<About />} />
           <Route path= "settings" element={<Settings />} />
+          <Route path= "masthead" element={<Masthead />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

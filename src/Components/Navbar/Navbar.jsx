@@ -7,6 +7,7 @@ import './Navbar.css';
 const BASE_PAGES = [
   { label: 'Home', destination: '/' },
   { label: 'About', destination: '/about' },
+  { label: 'Masthead', destination: '/masthead' },
   { label: 'Dashboard', destination: '/dashboard' },
 ];
 

@@ -1,3 +1,10 @@
+.loading {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: #666;
+}
+
 .about-container {
   max-width: 800px;
   margin: 2rem auto;
@@ -95,4 +102,74 @@
 
 .write-journal-button:hover {
   background-color: #6a11cb;
+}
+
+/* Editable content styles */
+.edit-title,
+.edit-section-title {
+  width: 100%;
+  font-size: 1.8rem;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 2px solid #2575fc;
+  border-radius: 4px;
+}
+
+.edit-intro,
+.edit-section-text {
+  width: 100%;
+  min-height: 100px;
+  font-size: 1.1rem;
+  padding: 8px;
+  margin-bottom: 15px;
+  border: 2px solid #2575fc;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.edit-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.edit-button,
+.save-button,
+.cancel-button {
+  padding: 8px 16px;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.edit-button {
+  background-color: #2575fc;
+  color: white;
+  border: none;
+}
+
+.save-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+}
+
+.cancel-button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+}
+
+.edit-button:hover {
+  background-color: #1b5cc5;
+}
+
+.save-button:hover {
+  background-color: #3d8b40;
+}
+
+.cancel-button:hover {
+  background-color: #d32f2f;
 }

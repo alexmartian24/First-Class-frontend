@@ -1,0 +1,57 @@
+.masthead-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.masthead-container h1 {
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-size: 2.5rem;
+}
+
+.masthead-content {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+.role-group {
+  margin-bottom: 2rem;
+}
+
+.role-group:last-child {
+  margin-bottom: 0;
+}
+
+.role-group h2 {
+  color: #34495e;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 0.5rem;
+}
+
+.role-group ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.role-group li {
+  margin: 0.8rem 0;
+  font-size: 1.1rem;
+  color: #2c3e50;
+}
+
+.role-group a {
+  color: #3498db;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.role-group a:hover {
+  color: #2980b9;
+  text-decoration: underline;
+}

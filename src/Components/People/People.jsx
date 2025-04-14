@@ -4,7 +4,8 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './People.css';
 
-import { BACKEND_URL, getSystemInfo } from '../../constants';
+// import { BACKEND_URL, getSystemInfo } from '../../constants';
+import { BACKEND_URL } from '../../constants';
 import { useAuth } from '../../context/AuthContext';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -501,14 +502,6 @@ function People() {
       >
         Add Person
       </button>
-
-        {/* Developer-only system info */}
-        {process.env.NODE_ENV === 'development' && (
-          <div style={{ marginTop: "2rem", padding: "1rem", backgroundColor: "#f0f0f0", borderRadius: "8px" }}>
-            <h3>🛠 Dev System Info</h3>
-            <pre>{JSON.stringify(getSystemInfo(), null, 2)}</pre>
-          </div>
-        )}
 
       <AddPersonForm
         visible={addingPerson}
