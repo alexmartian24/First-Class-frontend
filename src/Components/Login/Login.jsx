@@ -20,7 +20,8 @@ function Login() {
     }
 
     try {
-      await login(email, password);
+      const hashedPassword = "simulated_hashed_" + password; 
+      await login(email, hashedPassword); // use hashed password
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');

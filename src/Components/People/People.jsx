@@ -213,6 +213,8 @@ function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
     // Convert role names to role codes
     console.log('Selected role names:', roles);
     console.log('Role mapping:', roleMapping);
+    const hashedPassword = "simulated_hashed_" + password; 
+
     
     const roleCodes = roles.map(roleName => {
       // Find the code (key) for this role name (value)
@@ -228,9 +230,8 @@ function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
       email, 
       affiliation, 
       roles: roleCodes, // Send all roles
-      password 
+      password: hashedPassword
     };
-
     axios
       .put(PEOPLE_CREATE_ENDPOINT, newPerson, axiosConfig)
       .then(() => {
