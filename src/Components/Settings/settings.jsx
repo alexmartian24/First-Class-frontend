@@ -16,6 +16,30 @@ const PEOPLE_UPDATE_ENDPOINT = (email) =>
   `${BACKEND_URL}/people/update/${encodeURIComponent(email)}`;
 
 function Settings() {
+
+const handleDevInfoClick = () => {
+
+    axios
+  
+      .get(`${BACKEND_URL}/dev/info`, axiosConfig)
+  
+      .then((res) => {
+  
+        console.log("Dev Info:", res.data);
+  
+        alert("Dev Info fetched — check console for details.");
+  
+      })
+  
+      .catch((err) => {
+  
+        console.error("Failed to fetch dev info:", err);
+  
+        alert("Error fetching dev info.");
+  
+      });
+  
+  };
   const [notifications, setNotifications] = useState(true);
   const [language, setLanguage] = useState("English");
   const [darkMode, setDarkMode] = useState(false);
@@ -582,7 +606,7 @@ function Settings() {
           
           <div style={{ ...styles.settingRow, display: 'block' }}>
             <h3 style={styles.settingLabel}>Security</h3>
-            <div style={styles.buttonGroup}>
+              <div style={styles.buttonGroup}>
               <button 
                 style={{...styles.button, ...styles.primaryButton}}
                 onClick={openPasswordModal}
@@ -594,6 +618,12 @@ function Settings() {
                 onClick={() => console.debug("Two-Factor Authentication clicked")}
               >
                 Two-Factor Authentication
+              </button>
+              <button 
+                style={{...styles.button, ...styles.secondaryButton}}
+                onClick={handleDevInfoClick}
+              >
+                Fetch /dev/info
               </button>
             </div>
           </div>
