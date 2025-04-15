@@ -160,7 +160,7 @@
   min-height: 150px;
   font-size: 1.1rem;
   padding: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 0px !important;
   border: 2px solid #4361ee;
   border-radius: 8px;
   resize: vertical;
@@ -177,16 +177,19 @@
 }
 
 .edit-controls {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 20px;
+  display: flex !important;
+  gap: 10px !important;
+  justify-content: flex-start !important;
+  margin-top: 0 !important;         
+  margin-bottom: 30px !important;
+  width: 100%;
+  text-align: left;
 }
 
 .edit-button,
 .save-button,
 .cancel-button {
-  padding: 10px 20px;
+  padding: 10px 10px;
   font-size: 1rem;
   border-radius: 6px;
   cursor: pointer;
