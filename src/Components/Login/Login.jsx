@@ -20,8 +20,9 @@ function Login() {
     }
 
     try {
+      // Simulate password hashing
       const hashedPassword = "simulated_hashed_" + password; 
-      await login(email, hashedPassword); // use hashed password
+      await login(email, hashedPassword);
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
@@ -30,15 +31,11 @@ function Login() {
 
   return (
     <div className="login-container">
-      <header>
+      <header className="login-header">
         <h1>Login</h1>
       </header>
 
-      <form 
-        className="login-form" 
-        onSubmit={handleSubmit}
-        data-testid="login-form"
-      >
+      <form className="login-form" onSubmit={handleSubmit} data-testid="login-form">
         {error && <div className="error-message">{error}</div>}
 
         <div className="form-group">
