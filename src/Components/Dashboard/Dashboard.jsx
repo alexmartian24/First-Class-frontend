@@ -7,6 +7,8 @@ import { useAuth } from '../../context/AuthContext';
 
 import { BACKEND_URL } from '../../constants';
 
+const PEOPLE_NAME_ENDPOINT = (email) => `${BACKEND_URL}/people/name/${encodeURIComponent(email)}`;
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
@@ -397,6 +399,7 @@ function Dashboard() {
   const [editingManuscript, setEditingManuscript] = useState(null);
   const [manuscripts, setManuscripts] = useState([]);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [authorNames, setAuthorNames] = useState({});
 
   const fetchManuscripts = () => {
     if (!isAuthorized) return;
@@ -427,6 +430,43 @@ function Dashboard() {
       fetchManuscripts();
     }
   }, [isAuthorized]);
+
+  // Fetch author names for all manuscripts
+  useEffect(() => {
+    if (manuscripts.length > 0) {
+      // Create a set of unique author emails
+      const uniqueAuthors = [...new Set(manuscripts.map(m => m.author))];
+      
+      // Fetch names for all unique authors that look like emails
+      uniqueAuthors.forEach(authorEmail => {
+        // Simple email validation
+        if (authorEmail && authorEmail.includes('@')) {
+          fetchAuthorName(authorEmail);
+        }
+      });
+    }
+  }, [manuscripts]);
+
+  // Function to fetch author name from email
+  const fetchAuthorName = (email) => {
+    // Skip if we already have this author's name or it's not an email
+    if (authorNames[email] || !email.includes('@')) return;
+    
+    axios
+      .get(PEOPLE_NAME_ENDPOINT(email), axiosConfig)
+      .then(response => {
+        if (response.data && response.data.name) {
+          setAuthorNames(prev => ({
+            ...prev,
+            [email]: response.data.name
+          }));
+        }
+      })
+      .catch(error => {
+        console.error(`Error fetching name for ${email}:`, error);
+        // Don't set an error message as this is a non-critical feature
+      });
+  };
 
 
 
@@ -519,7 +559,11 @@ function Dashboard() {
                     <tr key={manuscript.manu_id}>
                       <td>{manuscript.manu_id}</td>
                       <td>{manuscript.title}</td>
-                      <td>{manuscript.author}</td>
+                      <td>
+                        {manuscript.author && manuscript.author.includes('@') && authorNames[manuscript.author] 
+                          ? authorNames[manuscript.author] 
+                          : manuscript.author}
+                      </td>
                       <td>
                         <span className={`state-badge state-${manuscript.curr_state?.toLowerCase()}`}>
                           {manuscript.curr_state}
