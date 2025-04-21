@@ -61,8 +61,8 @@ function Home() {
               />
               <textarea
                 className="edit-description"
-                value={content.description}
-                onChange={(e) => handleEdit("description", e.target.value)}
+                value={content.text}
+                onChange={(e) => handleEdit("text", e.target.value)}
                 placeholder="Enter description"
               />
             </>
@@ -70,8 +70,8 @@ function Home() {
             <>
               <h1 className="title">{content.title}</h1>
               <div className="subtitle-line"></div>
-              <p className="description">
-                {content.description}
+              <p className="text">
+                {content.text}
                 <Link to="/about" className="read-more-button">
                   Read More
                 </Link>

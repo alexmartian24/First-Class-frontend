@@ -233,7 +233,7 @@ function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
       password: hashedPassword
     };
     axios
-      .put(PEOPLE_CREATE_ENDPOINT, newPerson, axiosConfig)
+      .post(PEOPLE_CREATE_ENDPOINT, newPerson, axiosConfig)
       .then(() => {
         fetchPeople();
         setName('');

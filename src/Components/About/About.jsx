@@ -34,7 +34,31 @@ function About() {
       try {
         const response = await axios.get(`${BACKEND_URL}/text/about`);
         if (response.data) {
-          setContent(response.data);
+          // Check if the data has the expected structure
+          if (!response.data.sections) {
+            // If sections is missing, create a compatible structure
+            const formattedContent = {
+              title: response.data.title || 'About This Project',
+              intro: response.data.text || response.data.intro || 'Welcome to our journal platform.',
+              sections: [
+                {
+                  title: '🎯 Our Mission',
+                  text: 'To provide a robust platform for academic publishing.'
+                },
+                {
+                  title: '🔍 Key Features',
+                  text: 'Manuscript submission, peer review, and publication management.'
+                },
+                {
+                  title: '🚀 Get Started Today!',
+                  text: 'Explore the platform and take advantage of our features.'
+                }
+              ]
+            };
+            setContent(formattedContent);
+          } else {
+            setContent(response.data);
+          }
         } else {
           // If no data in backend, use default content
           setContent(defaultContent);
@@ -84,36 +108,37 @@ function About() {
   return (
     <div className="about-container">
       {content ? (
-        <div className="about-header">
-          <h1>{content.title}</h1>
-        
+        <>
+          <div className="about-header">
+            <h1>{content.title}</h1>
+            {content.intro && <p className="about-intro">{content.intro}</p>}
+          </div>
 
-
-        {content.sections.map((section, index) => (
-          <section key={index} className="about-section">
-            {isEditing ? (
-              <>
-                <input
-                  type="text"
-                  value={section.title}
-                  onChange={(e) => handleEdit('title', e.target.value, index)}
-                  className="edit-section-title"
-                />
-                <textarea
-                  value={section.text}
-                  onChange={(e) => handleEdit('text', e.target.value, index)}
-                  className="edit-section-text"
-                />
-              </>
-            ) : (
-              <>
-                <h2>{section.title}</h2>
-                <p>{section.text}</p>
-              </>
-            )}
-          </section>
-        ))}
-      </div>
+          {content.sections && content.sections.map((section, index) => (
+            <section key={index} className="about-section">
+              {isEditing ? (
+                <>
+                  <input
+                    type="text"
+                    value={section.title || ''}
+                    onChange={(e) => handleEdit('title', e.target.value, index)}
+                    className="edit-section-title"
+                  />
+                  <textarea
+                    value={section.text || ''}
+                    onChange={(e) => handleEdit('text', e.target.value, index)}
+                    className="edit-section-text"
+                  />
+                </>
+              ) : (
+                <>
+                  <h2>{section.title}</h2>
+                  <p>{section.text}</p>
+                </>
+              )}
+            </section>
+          ))}
+        </>
       ) : (
         <div className="loading">Loading...</div>
       )}
