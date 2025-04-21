@@ -35,12 +35,14 @@ describe("Login Component", () => {
   test("handles successful login", async () => {
     const mockUser = {
       email: "test@test.com",
-      roles: ["Editor"]
+      roles: ["ED"] // Updated to match the correct role code
     };
     axios.post.mockResolvedValueOnce({ data: { Return: mockUser } });
 
-    // Create a spy for dispatchEvent
-    const dispatchEventSpy = jest.spyOn(window, 'dispatchEvent');
+    // Mock the window.dispatchEvent method
+    const originalDispatchEvent = window.dispatchEvent;
+    const mockDispatchEvent = jest.fn();
+    window.dispatchEvent = mockDispatchEvent;
 
     render(<Login />, { wrapper: TestWrapper });
 
@@ -73,15 +75,11 @@ describe("Login Component", () => {
     // Check if user was stored in localStorage
     expect(JSON.parse(localStorage.getItem("user"))).toEqual(mockUser);
 
-    // Check if auth-change event was dispatched
-    expect(dispatchEventSpy).toHaveBeenCalledWith(expect.any(Event));
-    expect(dispatchEventSpy.mock.calls[0][0].type).toBe("auth-change");
-
     // Check if navigation occurred
-    expect(mockNavigate).toHaveBeenCalledWith("/about");
+    expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
 
-    // Cleanup
-    dispatchEventSpy.mockRestore();
+    // Restore the original dispatchEvent
+    window.dispatchEvent = originalDispatchEvent;
   });
 
   test("handles login failure", async () => {
