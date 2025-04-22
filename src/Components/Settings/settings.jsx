@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from 'axios';
 import { BACKEND_URL } from '../../constants';
+import { useContext } from "react";
+import { ThemeContext } from "../../context/ThemeContext.js";
 
 // Axios configuration for cross-origin requests - same as in People.jsx
 const axiosConfig = {
@@ -42,7 +44,9 @@ const handleDevInfoClick = () => {
   };
   const [notifications, setNotifications] = useState(true);
   const [language, setLanguage] = useState("English");
-  const [darkMode, setDarkMode] = useState(false);
+
+  const { darkMode, toggleDarkMode } = useContext(ThemeContext);
+  
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwords, setPasswords] = useState({
     current: "",
@@ -59,11 +63,6 @@ const handleDevInfoClick = () => {
   const toggleNotifications = () => {
     console.debug("Toggling notifications:", !notifications);
     setNotifications(!notifications);
-  };
-
-  const toggleDarkMode = () => {
-    console.debug("Toggling darkMode:", !darkMode);
-    setDarkMode(!darkMode);
   };
 
   const handleLanguageChange = (e) => {
