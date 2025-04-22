@@ -8,6 +8,8 @@ export const ThemeContext = createContext({
   darkMode: false,
   toggleDarkMode: () => {},
 });
+// Custom hook for easier use
+export const useTheme = () => React.useContext(ThemeContext);
 
 // Create the provider component
 export const ThemeProvider = ({ children }) => {
@@ -16,8 +18,15 @@ export const ThemeProvider = ({ children }) => {
   // Load saved preference from localStorage on initial render
   useEffect(() => {
     const saved = localStorage.getItem("darkMode");
-    if (saved !== null) setDarkMode(JSON.parse(saved));
+    if (saved !== null) {
+      setDarkMode(JSON.parse(saved));
+    } else {
+      // Use system preference on first visit
+      const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+      setDarkMode(prefersDark);
+    }
   }, []);
+  
 
   // Update localStorage and body class when darkMode changes
   useEffect(() => {
@@ -29,8 +38,8 @@ export const ThemeProvider = ({ children }) => {
   const toggleDarkMode = () => setDarkMode(prev => !prev);
 
   return (
-    <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
-      {children}
+<ThemeContext.Provider value={{ darkMode, toggleDarkMode, setDarkMode }}>
+{children}
     </ThemeContext.Provider>
   );
 };
