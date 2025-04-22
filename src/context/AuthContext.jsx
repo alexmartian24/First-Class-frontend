@@ -33,10 +33,28 @@ export function AuthProvider({ children }) {
         { email, password },
         axiosConfig
       );
-      
+  
       const userData = response.data.Return;
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
+  
+      // Extended activity commit
+      const commitPayload = {
+        userId: userData.id,
+        userName: userData.name,
+        userEmail: userData.email,
+        roles: userData.roles,
+        action: 'LOGIN',
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        metadata: {
+          loginMethod: 'password',
+          isEditor: userData.roles?.includes('ED') || userData.roles?.includes('ME'),
+        },
+      };
+  
+      await axios.post(`${BACKEND_URL}/activity/commit`, commitPayload, axiosConfig);
+  
       return userData;
     } catch (error) {
       console.error('Login failed:', error);
@@ -52,7 +70,7 @@ export function AuthProvider({ children }) {
   const isEditor = () => {
     return user?.roles?.includes('ED') || user?.roles?.includes('ME');
   };
-  
+
 
   const value = {
     user,
