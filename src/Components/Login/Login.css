@@ -104,3 +104,46 @@ html, body {
   font-size: 0.95rem;
   border: 1px solid #ffd7d7;
 }
+
+/* Logo and subtle animation */
+.logo {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 0.5rem;
+}
+
+.login-header p {
+  font-size: 0.95rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-in-out both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.additional-links {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.additional-links a {
+  font-size: 0.9rem;
+  color: #3d5afe;
+  text-decoration: none;
+}
+
+.additional-links a:hover {
+  text-decoration: underline;
+}

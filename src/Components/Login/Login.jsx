@@ -28,40 +28,46 @@ function Login() {
   };
 
   return (
-    <div className="login-container">
+    <div className="login-container fade-in">
       <header className="login-header">
-        <h1>Login</h1>
+        <img src="/logo192.png" alt="Logo" className="logo" />
+        <h1>Welcome Back</h1>
+        <p>Please login to your account</p>
       </header>
 
-      <form className="login-form" onSubmit={handleSubmit} data-testid="login-form">
+      <form className="login-form" onSubmit={handleSubmit}>
         {error && <div className="error-message">{error}</div>}
 
         <div className="form-group">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">NYU Email</label>
           <input
-            required
             type="email"
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
+            placeholder="netid@nyu.edu"
+            required
           />
         </div>
 
         <div className="form-group">
           <label htmlFor="password">Password</label>
           <input
-            required
             type="password"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
+            required
           />
         </div>
 
         <div className="form-actions">
           <button type="submit">Login</button>
+        </div>
+
+        <div className="additional-links">
+          <a href="/forgot-password">Forgot password?</a>
         </div>
       </form>
     </div>
