@@ -38,22 +38,6 @@ export function AuthProvider({ children }) {
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
   
-      // Extended activity commit
-      const commitPayload = {
-        userId: userData.id,
-        userName: userData.name,
-        userEmail: userData.email,
-        roles: userData.roles,
-        action: 'LOGIN',
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-        metadata: {
-          loginMethod: 'password',
-          isEditor: userData.roles?.includes('ED') || userData.roles?.includes('ME'),
-        },
-      };
-  
-      await axios.post(`${BACKEND_URL}/activity/commit`, commitPayload, axiosConfig);
   
       return userData;
     } catch (error) {
