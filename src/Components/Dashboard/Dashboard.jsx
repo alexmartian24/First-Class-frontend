@@ -115,6 +115,7 @@ function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscrip
   const currentState = manuscript?.curr_state || '';
   const [newState, setNewState] = useState('');
   const [refereeEmail, setRefereeEmail] = useState('');
+  const [refereesList, setRefereesList] = useState([]);
 
   const [actionMapping, setActionMapping] = useState({});
   
@@ -136,6 +137,17 @@ function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscrip
       setNewState(''); // Reset new state when manuscript changes
     }
   }, [manuscript]);
+
+    // fetch the list of referees once when the form mounts
+    useEffect(() => {
+      axios
+        .get(`${BACKEND_URL}/people/referees`, axiosConfig)
+        .then(({ data }) => setRefereesList(data))
+        .catch(err => {
+          console.error('Failed to load referees:', err);
+          setError('Could not load referees list');
+        });
+    }, []);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -217,18 +229,23 @@ function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscrip
         </select>
       </div>
 
-      {/* Only show referee email field for DRF/ARF states */}
+
       {(newState === 'DRF' || newState === 'ARF') && (
         <div className="form-group">
           <label htmlFor="refereeEmail">Referee Email</label>
-          <input
-            type="email"
+          <select
             id="refereeEmail"
             value={refereeEmail}
-            onChange={(e) => setRefereeEmail(e.target.value)}
-            placeholder="Enter referee email"
+            onChange={e => setRefereeEmail(e.target.value)}
             required
-          />
+          >
+            <option value="">— Select a referee —</option>
+            {refereesList.map(email => (
+              <option key={email} value={email}>
+                {email}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 
