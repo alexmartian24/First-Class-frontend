@@ -13,8 +13,31 @@ jest.mock('./context/AuthContext', () => {
   };
 });
 
+// Mock localStorage
+const localStorageMock = (() => {
+  let store = {};
+  return {
+    getItem: jest.fn(key => store[key] || null),
+    setItem: jest.fn((key, value) => {
+      if (value !== undefined) {
+        store[key] = typeof value === 'string' ? value : JSON.stringify(value);
+      }
+    }),
+    removeItem: jest.fn(key => {
+      delete store[key];
+    }),
+    clear: jest.fn(() => {
+      store = {};
+    })
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+
 describe('App', () => {
   beforeEach(() => {
+    // Clear localStorage before each test
+    localStorage.clear();
     // Default mock implementation for useAuth - no user logged in
     useAuth.mockImplementation(() => ({
       user: null,

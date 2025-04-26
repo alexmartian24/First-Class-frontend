@@ -35,7 +35,7 @@ function Login() {
         <p>Please login to your account</p>
       </header>
 
-      <form className="login-form" onSubmit={handleSubmit}>
+      <form className="login-form" data-testid="login-form" onSubmit={handleSubmit}>
         {error && <div className="error-message">{error}</div>}
 
         <div className="form-group">

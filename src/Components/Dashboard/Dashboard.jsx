@@ -25,25 +25,8 @@ const CREATE_MANUSCRIPT_ENDPOINT = `${BACKEND_URL}/manuscripts/create`;
 const FETCH_MANUSCRIPT_ENDPOINT = `${BACKEND_URL}/manuscripts`;
 const DELETE_MANUSCRIPT_ENDPOINT = (id) => `${BACKEND_URL}/manuscripts/delete/${encodeURIComponent(id)}`;
 
-// Map state codes to human-readable names
-const STATE_NAMES = {
-  // States
-  'SUB': 'Submitted',
-  'AUR': 'Author Review',
-  'CED': 'Copy Editing',
-  'EDR': 'Editor Review',
-  'FMT': 'Formatting',
-  'REV': 'In Referee Review',
-  'PUB': 'Published',
-  'REJ': 'Rejected',
-  'WIT': 'Withdrawn',
-  // Actions
-  'ARF': 'Assign Referee',
-  'DRF': 'Delete Referee',
-  'ACC': 'Accept',
-  'DON': 'Done',
-  'EMV': 'Editor Move',
-};
+// State names will be fetched from the backend
+const STATE_NAMES_ENDPOINT = `${BACKEND_URL}/manuscripts/state_names`;
 
 function CreateManuscriptForm({ visible, cancel, setError, onSuccess }) {
   const [title, setTitle] = useState('');
@@ -109,7 +92,9 @@ CreateManuscriptForm.propTypes = {
   onSuccess: propTypes.func,
 };
 
-function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscripts }) {
+function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscripts, stateNames }) {
+  // Ensure stateNames is an object
+  const stateNamesObj = stateNames && !Array.isArray(stateNames) ? stateNames : {};
   // Initialize with manuscript ID if provided
   const manuscriptId = manuscript?.manu_id || '';
   const currentState = manuscript?.curr_state || '';
@@ -200,7 +185,7 @@ function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscrip
         <input
           type="text"
           id="currentState"
-          value={STATE_NAMES[currentState] || currentState}
+          value={stateNamesObj[currentState] || currentState}
           readOnly
           className="readonly-field"
         />
@@ -223,7 +208,7 @@ function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscrip
           <option value="">Select action</option>
           {availableActions.map((action) => (
             <option key={action} value={action}>
-              {STATE_NAMES[action] || action}
+              {stateNamesObj[action] || action}
             </option>
           ))}
         </select>
@@ -269,6 +254,10 @@ ChangeStateForm.propTypes = {
   cancel: propTypes.func.isRequired,
   setError: propTypes.func.isRequired,
   fetchManuscripts: propTypes.func.isRequired,
+  stateNames: propTypes.oneOfType([
+    propTypes.object,
+    propTypes.array
+  ]),
 };
 
 function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManuscriptId }) {
@@ -417,6 +406,7 @@ function Dashboard() {
   const [manuscripts, setManuscripts] = useState([]);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [authorNames, setAuthorNames] = useState({});
+  const [stateNames, setStateNames] = useState({});
 
   const fetchManuscripts = () => {
     if (!isAuthorized) return;
@@ -431,6 +421,40 @@ function Dashboard() {
         setError(`Failed to retrieve manuscripts: ${err.message}`);
       });
   };
+
+  // Fetch state names from backend
+  useEffect(() => {
+    axios
+      .get(STATE_NAMES_ENDPOINT, axiosConfig)
+      .then(({ data }) => {
+        console.log('State names API response:', data, 'Type:', Array.isArray(data) ? 'Array' : typeof data);
+        // Ensure stateNames is an object, not an array
+        if (data && typeof data === 'object') {
+          // If it's an array, convert it to an object
+          if (Array.isArray(data)) {
+            console.warn('State names received as array, converting to object');
+            const stateNamesObj = {};
+            data.forEach(item => {
+              if (item && item.code && item.name) {
+                stateNamesObj[item.code] = item.name;
+              }
+            });
+            setStateNames(stateNamesObj);
+          } else {
+            // It's already an object
+            setStateNames(data);
+          }
+        } else {
+          console.error('Invalid state names data received:', data);
+          setStateNames({}); // Set to empty object as fallback
+        }
+      })
+      .catch((err) => {
+        console.error('Error fetching state names:', err);
+        setError(`Failed to retrieve state names: ${err.message}`);
+        setStateNames({}); // Set to empty object on error
+      });
+  }, []);
 
   // Check user authorization on mount
   useEffect(() => {
@@ -553,6 +577,7 @@ function Dashboard() {
           cancel={cancelEdit}
           setError={setError}
           fetchManuscripts={fetchManuscripts}
+          stateNames={stateNames}
         />
       )}
 
@@ -583,7 +608,7 @@ function Dashboard() {
                       </td>
                       <td>
                         <span className={`state-badge state-${manuscript.curr_state?.toLowerCase()}`}>
-                          {manuscript.curr_state}
+                          {stateNames[manuscript.curr_state] || manuscript.curr_state}
                         </span>
                       </td>
                       <td>

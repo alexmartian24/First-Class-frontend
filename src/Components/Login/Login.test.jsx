@@ -26,8 +26,8 @@ describe("Login Component", () => {
 
   test("renders login form", () => {
     render(<Login />, { wrapper: TestWrapper });
-    expect(screen.getByRole("heading", { name: "Login" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Email")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Welcome Back" })).toBeInTheDocument();
+    expect(screen.getByLabelText("NYU Email")).toBeInTheDocument();
     expect(screen.getByLabelText("Password")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Login" })).toBeInTheDocument();
   });
@@ -48,7 +48,7 @@ describe("Login Component", () => {
 
     // Fill out form
     await act(async () => {
-      fireEvent.change(screen.getByLabelText("Email"), {
+      fireEvent.change(screen.getByLabelText("NYU Email"), {
         target: { value: "test@test.com" }
       });
       fireEvent.change(screen.getByLabelText("Password"), {
@@ -92,7 +92,7 @@ describe("Login Component", () => {
 
     // Fill out form
     await act(async () => {
-      fireEvent.change(screen.getByLabelText("Email"), {
+      fireEvent.change(screen.getByLabelText("NYU Email"), {
         target: { value: "test@test.com" }
       });
       fireEvent.change(screen.getByLabelText("Password"), {
