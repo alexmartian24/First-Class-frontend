@@ -23,10 +23,13 @@ const axiosConfig = {
 const RECEIVE_ACTION_ENDPOINT = `${BACKEND_URL}/manuscripts/receive_action`;
 const CREATE_MANUSCRIPT_ENDPOINT = `${BACKEND_URL}/manuscripts/create`;
 const FETCH_MANUSCRIPT_ENDPOINT = `${BACKEND_URL}/manuscripts`;
+const SORTED_MANUSCRIPTS_ENDPOINT = `${BACKEND_URL}/manuscripts/sorted`;
+const MANUSCRIPTS_BY_STATE_ENDPOINT = (state) => `${BACKEND_URL}/manuscripts/state/${encodeURIComponent(state)}`;
 const DELETE_MANUSCRIPT_ENDPOINT = (id) => `${BACKEND_URL}/manuscripts/delete/${encodeURIComponent(id)}`;
 
 // State names will be fetched from the backend
 const STATE_NAMES_ENDPOINT = `${BACKEND_URL}/manuscripts/state_names`;
+const VALID_STATES_ENDPOINT = `${BACKEND_URL}/manuscripts/valid_states`;
 
 function CreateManuscriptForm({ visible, cancel, setError, onSuccess }) {
   const [title, setTitle] = useState('');
@@ -407,18 +410,53 @@ function Dashboard() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [authorNames, setAuthorNames] = useState({});
   const [stateNames, setStateNames] = useState({});
+  const [viewMode, setViewMode] = useState('default'); // 'default', 'sorted', or state code
+  const [validStates, setValidStates] = useState([]);
+  const [validStateOptions, setValidStateOptions] = useState([]);
 
   const fetchManuscripts = () => {
     if (!isAuthorized) return;
+    
+    let endpoint;
+    switch (viewMode) {
+      case 'sorted':
+        endpoint = SORTED_MANUSCRIPTS_ENDPOINT;
+        break;
+      case 'default':
+        endpoint = FETCH_MANUSCRIPT_ENDPOINT;
+        break;
+      default:
+        // If viewMode is a state code
+        if (validStates.includes(viewMode)) {
+          endpoint = MANUSCRIPTS_BY_STATE_ENDPOINT(viewMode);
+        } else {
+          endpoint = FETCH_MANUSCRIPT_ENDPOINT;
+        }
+    }
+    
     axios
-      .get(FETCH_MANUSCRIPT_ENDPOINT, axiosConfig)
+      .get(endpoint, axiosConfig)
       .then(({ data }) => {
         const manuscriptsArray = Array.isArray(data) ? data : [data];
         setManuscripts(manuscriptsArray);
       })
       .catch((err) => {
-        console.error('Error fetching manuscripts:', err);
+        console.error(`Error fetching manuscripts (${viewMode}):`, err);
         setError(`Failed to retrieve manuscripts: ${err.message}`);
+        // If there's an error with a filtered view, fall back to default view
+        if (viewMode !== 'default') {
+          setViewMode('default');
+          // Retry with default endpoint
+          axios.get(FETCH_MANUSCRIPT_ENDPOINT, axiosConfig)
+            .then(({ data }) => {
+              const manuscriptsArray = Array.isArray(data) ? data : [data];
+              setManuscripts(manuscriptsArray);
+            })
+            .catch((retryErr) => {
+              console.error('Error fetching manuscripts (fallback):', retryErr);
+              setError(`Failed to retrieve manuscripts: ${retryErr.message}`);
+            });
+        }
       });
   };
 
@@ -434,25 +472,53 @@ function Dashboard() {
           if (Array.isArray(data)) {
             console.warn('State names received as array, converting to object');
             const stateNamesObj = {};
+            const stateCodesList = [];
             data.forEach(item => {
               if (item && item.code && item.name) {
                 stateNamesObj[item.code] = item.name;
+                stateCodesList.push(item.code);
               }
             });
             setStateNames(stateNamesObj);
+            setValidStates(stateCodesList);
           } else {
             // It's already an object
             setStateNames(data);
+            setValidStates(Object.keys(data));
           }
         } else {
           console.error('Invalid state names data received:', data);
           setStateNames({}); // Set to empty object as fallback
+          setValidStates([]);
         }
       })
       .catch((err) => {
         console.error('Error fetching state names:', err);
         setError(`Failed to retrieve state names: ${err.message}`);
         setStateNames({}); // Set to empty object on error
+      });
+  }, []);
+  
+  // Fetch valid states with their display names
+  useEffect(() => {
+    axios
+      .get(VALID_STATES_ENDPOINT, axiosConfig)
+      .then(({ data }) => {
+        console.log('Valid states API response:', data);
+        if (Array.isArray(data)) {
+          // Extract state codes for filtering
+          const stateCodes = data.map(state => state.code);
+          setValidStates(stateCodes);
+          // Save the full state objects with code and name for the dropdown
+          setValidStateOptions(data);
+        } else {
+          console.error('Invalid valid states data received:', data);
+          setValidStateOptions([]);
+        }
+      })
+      .catch((err) => {
+        console.error('Error fetching valid states:', err);
+        setValidStateOptions([]);
       });
   }, []);
 
@@ -466,11 +532,12 @@ function Dashboard() {
     setIsAuthorized(true);
   }, [user, isEditor]);
 
+  // Fetch manuscripts when authorized or viewMode changes
   useEffect(() => {
     if (isAuthorized) {
       fetchManuscripts();
     }
-  }, [isAuthorized]);
+  }, [isAuthorized, viewMode]);
 
   // Fetch author names for all manuscripts
   useEffect(() => {
@@ -583,9 +650,49 @@ function Dashboard() {
 
       {isAuthorized && (
         <>
+          <div className="view-controls">
+            <h3>View Options</h3>
+            <div className="view-buttons">
+              <button 
+                className={viewMode === 'default' ? 'active' : ''}
+                onClick={() => setViewMode('default')}
+              >
+                Default Order
+              </button>
+              <button 
+                className={viewMode === 'sorted' ? 'active' : ''}
+                onClick={() => setViewMode('sorted')}
+              >
+                Sort by State
+              </button>
+            </div>
+            
+            {validStateOptions.length > 0 && (
+              <div className="filter-controls">
+                <label htmlFor="stateFilter">Filter by State:</label>
+                <select 
+                  id="stateFilter" 
+                  value={validStates.includes(viewMode) ? viewMode : ''}
+                  onChange={(e) => setViewMode(e.target.value || 'default')}
+                >
+                  <option value="">-- Select State --</option>
+                  {validStateOptions.map(state => (
+                    <option key={state.code} value={state.code}>
+                      {state.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+          
           {manuscripts.length > 0 ? (
             <div className="manuscripts-list">
-              <h2>All Manuscripts</h2>
+              <h2>
+                {viewMode === 'default' && 'All Manuscripts'}
+                {viewMode === 'sorted' && 'Manuscripts Sorted by State'}
+                {validStates.includes(viewMode) && `Manuscripts in State: ${stateNames[viewMode] || viewMode}`}
+              </h2>
               <table className="manuscripts-table">
                 <thead>
                   <tr>
