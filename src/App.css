@@ -1,120 +1,84 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html {
+/* ========== THEME VARIABLES ========== */
+:root {
   --poppy: hsla(356, 74%, 52%, 1);
-  --gradient-start: hsla(250, 90%, 60%, 1); /* Adjusted for navbar */
-  --gradient-end: hsla(230, 90%, 60%, 1);   /* Adjusted for navbar */
+  --gradient-start: hsla(250, 90%, 60%, 1);
+  --gradient-end: hsla(230, 90%, 60%, 1);
   --lemon-chiffon: hsla(58, 74%, 85%, 1);
   --buff: hsla(27, 64%, 65%, 1);
   --bistre: hsla(10, 31%, 19%, 1);
   --off-white: hsla(45, 29%, 97%, 1);
 
-  --background-color: var(--off-white);
-  --accent-color: var(--gradient-start); /* Updated to match navbar */
+  /* Light theme (default) */
+  --bg: var(--off-white);
+  --text: #333;
+  --card-bg: white;
+  --accent: var(--gradient-start);
+  --danger: #f44336;
 }
 
-.wrapper {
-  max-width: min(800px, 100% - 4rem);
-  margin-inline: auto;
+body.dark {
+  /* Dark theme overrides */
+  --bg: #121212;
+  --text: #f7f7f7;
+  --card-bg: #1e1e1e;
+  --accent: #90caf9;
+  --danger: #ef5350;
 }
 
-.wrapper header {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
+/* ========== GLOBAL STYLES ========== */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* ========== BUTTONS ========== */
 button {
-  font-size: 1.5rem;
+  font-size: 1rem;
   padding: 0.5rem 1rem;
   cursor: pointer;
-
   border-radius: 5px;
-  border: 2px solid var(--accent-color);
-  color: var(--accent-color);
-  background: var(--background-color);
-}
-button:focus,
-button:hover {
-  background: var(--accent-color);
-  color: var(--background-color);
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  background: var(--bg);
+  transition: background 0.2s, color 0.2s;
 }
 
-.error-message {
-  color: red;
-  font-weight: bold;
-  background: #ffeeee;
-  padding: 10px;
-  border-radius: 5px;
-  text-align: center;
+button:hover, button:focus {
+  background: var(--accent);
+  color: var(--bg);
+  outline: none;
 }
 
-form input {
-  display: block;
-  margin: 0.5rem 0 1rem 0;
-  padding: 1rem 0.5rem 0.5rem 0.5rem;
-  border-radius: 5px;
-  border: 1px solid var(--accent-color);
-  font-size: 1rem;
+.button.primary {
+  background: var(--accent);
+  color: white;
+  border: none;
 }
 
-input[type="text"], select {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.button.danger {
+  background: var(--danger);
+  color: white;
+  border: none;
 }
 
-form input[type="email"] {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+/* ========== CARD / CONTAINER ========== */
+.card {
+  background-color: var(--card-bg);
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin: 1rem 0;
 }
 
-form input[type="email"]:valid,
-form input[type="email"]:invalid {
-  box-shadow: none;
-  border: 1px solid #ccc;
-}
-
-form select {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-form label {
-  display: block;
-  margin: 0.5rem 0 0.5rem 0;
-  font-weight: bold;
-  color: var(--accent-color);
-}
-
-form button {
-  margin-right: 1rem;
-}
-
-form button[type=button] {
-  border-color: var(--background-color);
-}
-
-form button[type=button]:focus,
-form button[type=button]:hover {
-  border-color: var(--accent-color);
-}
-
-/* NAVBAR FIX: ADDED GRADIENT BACKGROUND */
+/* ========== NAVBAR ========== */
 nav {
   margin: 0;
   padding-top: 0.5rem;
@@ -129,67 +93,21 @@ nav ul {
 }
 
 nav a {
-  position: relative;
-  z-index: 1;
-  color: var(--background-color);
-  display: block;
-  --padding: 1rem;
-  padding: var(--padding);
+  color: var(--bg);
   text-decoration: none;
+  padding: 1rem;
   font-weight: bold;
-  --border-radius: 15px;
-  border-radius: 5px 5px 0 0;
 }
 
-.person-container {
-  padding: 0.75rem;
-  margin: 0.75rem 0;
-  border: 1px solid var(--accent-color);
-  border-radius: 8px;
-  background-color: #fff;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.person-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.person-details a {
-  color: black;
-  text-decoration: underline;
-}
-
-.person-details a:hover,
-.person-details a:focus {
-  color: #333;
-}
-
-.person-details h2 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #000;
-}
-
-.person-details p {
-  margin: 0;
-  font-size: 1rem;
-  color: #333;
-  line-height: 1.4;
-}
-
+/* ========== SETTINGS ========== */
 .settings-container {
   padding: 1rem 2rem;
   max-width: 800px;
 }
 
 .settings-container h1 {
-  margin-bottom: 1.5rem;
   font-size: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .settings-section {
@@ -197,9 +115,9 @@ nav a {
 }
 
 .settings-section h2 {
-  margin-bottom: 1rem;
   font-size: 1.2rem;
-  color: var(--accent-color);
+  margin-bottom: 1rem;
+  color: var(--accent);
 }
 
 .setting-field {
@@ -209,9 +127,8 @@ nav a {
 }
 
 .setting-field label {
-  font-size: 1rem;
   margin-right: 0.5rem;
-  color: #333;
+  color: var(--text);
 }
 
 .setting-field input[type="checkbox"] {
@@ -220,56 +137,10 @@ nav a {
 }
 
 .setting-field select {
-  font-size: 1rem;
   padding: 0.25rem 0.5rem;
-  border: 1px solid var(--accent-color);
+  border: 1px solid var(--accent);
   border-radius: 4px;
+  background-color: var(--card-bg);
+  color: var(--text);
 }
 
-.settings-container .setting-field select {
-  width: auto !important;
-  min-width: 120px;
-  font-size: 1rem;
-  padding: 0.25rem 0.5rem;
-  border: 1px solid var(--accent-color);
-  border-radius: 4px;
-}
-
-.account-actions {
-  display: flex;
-  gap: 1rem;
-}
-
-.account-actions button {
-  font-size: 1rem;
-  padding: 0.5rem 1rem;
-  border: 2px solid var(--accent-color);
-  border-radius: 5px;
-  background: var(--background-color);
-  color: var(--accent-color);
-  cursor: pointer;
-}
-
-.account-actions button:hover,
-.account-actions button:focus {
-  background: var(--accent-color);
-  color: var(--background-color);
-  outline: none;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.light-mode {
-  background-color: #f8f9fa;
-  color: black;
-}
-
-.dark-mode {
-  background-color: #121212;
-  color: white;
-}
