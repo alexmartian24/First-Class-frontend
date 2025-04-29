@@ -244,7 +244,7 @@ function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscrip
           onClick={handleSubmit}
           disabled={!manuscriptId || !currentState || !newState}
         >
-          Change State
+          Perform Action
         </button>
       </div>
     </form>
