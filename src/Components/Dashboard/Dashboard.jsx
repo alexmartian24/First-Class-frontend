@@ -437,7 +437,10 @@ function Dashboard() {
     axios
       .get(endpoint, axiosConfig)
       .then(({ data }) => {
-        const manuscriptsArray = Array.isArray(data) ? data : [data];
+        let manuscriptsArray = Array.isArray(data) ? data : [data];
+        if (viewMode === 'sorted') {
+          manuscriptsArray = manuscriptsArray.slice().reverse();
+        }
         setManuscripts(manuscriptsArray);
       })
       .catch((err) => {
