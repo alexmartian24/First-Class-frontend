@@ -101,8 +101,12 @@ nav a {
 
 /* ========== SETTINGS ========== */
 .settings-container {
-  padding: 1rem 2rem;
+  margin: 0 auto;
+  padding: 2rem;
   max-width: 800px;
+  min-height: 100vh;
+  background-color: var(--bg);
+  color: var(--text);
 }
 
 .settings-container h1 {
