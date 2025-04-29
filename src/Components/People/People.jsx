@@ -23,7 +23,7 @@ import { faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
   const PEOPLE_READ_ENDPOINT = `${BACKEND_URL}/people`;
   const PEOPLE_CREATE_ENDPOINT = `${BACKEND_URL}/people/create`;
   const PEOPLE_UPDATE_ENDPOINT = (email) =>
-    `${BACKEND_URL}/people/update/${encodeURIComponent(email)}`;
+    `${BACKEND_URL}/people/${encodeURIComponent(email)}`;
   const PEOPLE_DELETE_ENDPOINT = (email) =>
     `${BACKEND_URL}/people/${encodeURIComponent(email)}`;
 
