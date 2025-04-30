@@ -1,69 +1,74 @@
 import React from 'react';
-import propTypes from 'prop-types';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Navbar.css';
 
 const BASE_PAGES = [
-  { label: 'Home', destination: '/' },
-  { label: 'About', destination: '/about' },
-  { label: 'Masthead', destination: '/masthead' },
-  { label: 'Dashboard', destination: '/dashboard' },
+  { label: 'Home',      to: '/'         },
+  { label: 'About',     to: '/about'    },
+  { label: 'Masthead',  to: '/masthead' },
+  { label: 'Dashboard', to: '/dashboard'},
 ];
 
 const EDITOR_PAGES = [
-  { label: 'People', destination: '/people' },
-  { label: 'Settings', destination: '/settings' },
+  { label: 'People',    to: '/people'   },
+  { label: 'Settings',  to: '/settings' },
 ];
-
-function NavLink({ page }) {
-  const { label, destination } = page;
-  return (
-    <li className="nav-item">
-      <Link to={destination} className="nav-link">{label}</Link>
-    </li>
-  );
-}
-
-NavLink.propTypes = {
-  page: propTypes.shape({
-    label: propTypes.string.isRequired,
-    destination: propTypes.string.isRequired,
-  }).isRequired,
-};
 
 function Navbar() {
   const { user, logout, isEditor } = useAuth();
-  const navigate = useNavigate();
+  const navigate   = useNavigate();
+  const location   = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-
-
+  // build page list
   const pages = [...BASE_PAGES];
-  if (user && isEditor()) {
-    pages.push(...EDITOR_PAGES);
-  }
+  if (user && isEditor()) pages.push(...EDITOR_PAGES);
 
   return (
     <nav className="navbar">
-      <ul className="nav-list">
-        {pages.map((page) => (
-          <NavLink key={page.destination} page={page} />
-        ))}
-        <li className="nav-item">
+      <div className="nav-container">
+        {/* BRAND */}
+        <Link to="/" className="nav-brand">Journal</Link>
+
+        {/* LINKS */}
+        <ul className="nav-list">
+          {pages.map(({ label, to }) => (
+            <li key={to} className="nav-item">
+              <Link
+                to={to}
+                className={
+                  'nav-link' +
+                  (location.pathname === to ? ' active' : '')
+                }
+              >
+                {label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        {/* LOGIN / LOGOUT */}
+        <div className="nav-cta">
           {user ? (
-            <button onClick={handleLogout} className="nav-link">Logout ({user.name})</button>
+            <button onClick={handleLogout} className="nav-link logout">
+              Logout&nbsp;({user.name})
+            </button>
           ) : (
             <Link to="/login" className="nav-link">Login</Link>
           )}
-        </li>
-      </ul>
+        </div>
+      </div>
     </nav>
   );
 }
+
+Navbar.propTypes = {
+  // nothing
+};
 
 export default Navbar;

@@ -1,49 +1,92 @@
-/* Navbar.css */
+/* src/Components/Navbar/Navbar.css */
+
+/* sticky full-width gradient background */
 .navbar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    padding: 15px 0;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-  
-.nav-list {
-    display: flex;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    gap: 25px;
-}
-  
-.nav-item {
-    position: relative;
-}
-  
-.nav-link {
-    text-decoration: none;
-    font-size: 18px;
-    font-weight: bold;
-    color: #fff;
-    padding: 10px 15px;
-    transition: all 0.3s ease-in-out;
-    border-radius: 8px;
-}
-  
-.nav-link:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.1);
-    transition: 0.3s ease-in-out;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: linear-gradient(90deg, #7209b7, #4361ee);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
 }
 
-/* Logout button styles */
-button.nav-link {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    padding: 10px 15px;
-    margin: 0;
-    display: inline-block;
-    color: #fff;
+/* center contents in a max-width container */
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+}
+
+/* brand on the left */
+.nav-brand {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+
+/* nav links immediately to the right */
+.nav-list {
+  display: flex;
+  gap: 1rem;
+  margin-left: 2rem;
+}
+
+/* push login/logout to the far right */
+.nav-cta {
+  margin-left: auto;
+}
+
+/* each link as a pill */
+.nav-link {
+  position: relative;
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 999px;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    transform 0.2s ease;
+}
+
+/* hover and active states */
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.nav-link.active {
+  background: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+/* logout button uses same styling */
+.nav-cta .nav-link.logout {
+  background: rgba(255, 255, 255, 0.2);
+}
+.nav-cta .nav-link.logout:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* small mobile tweak: wrap links */
+@media (max-width: 768px) {
+  .nav-container {
+    flex-wrap: wrap;
+  }
+  .nav-list {
+    width: 100%;
+    justify-content: center;
+    margin: 0.5rem 0;
+  }
+  .nav-cta {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
 }
