@@ -9,6 +9,13 @@ function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
+  const handleForgotPassword = () => {
+    setEmail('');
+    setPassword('');
+    setError('');
+    navigate('/forgot-password');
+  };
+  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -67,7 +74,7 @@ function Login() {
         </div>
 
         <div className="additional-links">
-          <a href="/forgot-password">Forgot password?</a>
+        <button type="button" className="link-button" onClick={handleForgotPassword}>Forgot password?</button>
         </div>
       </form>
     </div>

@@ -16,6 +16,7 @@ import Home from './Components/Home/Home.js';
 import About from './Components/About/About.jsx';
 import Settings from './Components/Settings/settings.jsx';
 import Masthead from './Components/Masthead/Masthead.jsx';
+import ForgotPassword from './Components/ForgotPassword/ForgotPassword.jsx';
 
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext.js'; // <- Make sure this path is correct
@@ -40,6 +41,7 @@ function App() {
             <Route path="about" element={<About />} />
             <Route path="settings" element={<Settings />} />
             <Route path="masthead" element={<Masthead />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

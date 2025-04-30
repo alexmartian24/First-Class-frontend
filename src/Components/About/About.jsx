@@ -52,7 +52,7 @@ function About() {
               case 'about_header':
                 newData.header = {
                   title: data.title || newData.header.title,
-                  text: data.text || newData.header.intro
+                  text: data.text || newData.header.text
                 };
                 break;
               case 'about_mission':
