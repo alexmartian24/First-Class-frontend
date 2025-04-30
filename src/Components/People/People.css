@@ -101,6 +101,96 @@
   color: #dc3545;
 }
 
+/* Person Detail Page Styles */
+.person-detail-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.person-detail-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.person-detail-header h1 {
+  font-size: 2.5rem;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.person-detail-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.person-detail-card h2 {
+  margin-top: 0;
+  color: #1a1a2e;
+  font-size: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 1rem;
+}
+
+.person-detail-card p {
+  margin: 0.7rem 0;
+  font-size: 1rem;
+  color: #444;
+}
+
+.person-manuscripts {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 1.5rem;
+}
+
+.person-manuscripts h2 {
+  margin-top: 0;
+  color: #1a1a2e;
+  font-size: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 1.5rem;
+}
+
+.person-manuscripts-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.manuscript-card {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 1.2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+}
+
+.manuscript-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.manuscript-card h3 {
+  margin-top: 0;
+  color: #1a1a2e;
+  font-size: 1.2rem;
+  margin-bottom: 0.8rem;
+}
+
+.manuscript-card p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #444;
+}
+
 /* Modal overlay + form */
 .modal-overlay {
   position: fixed; inset: 0;

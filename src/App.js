@@ -3,13 +3,13 @@ import {
   BrowserRouter,
   Routes,
   Route,
-  useParams,
 } from 'react-router-dom';
 
 import './App.css';
 
 import Navbar from './Components/Navbar/Navbar.jsx'; 
 import People from './Components/People/People.jsx';
+import PersonDetail from './Components/People/PersonDetail.jsx';
 import Login from './Components/Login/Login.jsx';
 import Dashboard from './Components/Dashboard/Dashboard.jsx';
 import Home from './Components/Home/Home.js';
@@ -19,12 +19,7 @@ import Masthead from './Components/Masthead/Masthead.jsx';
 import ForgotPassword from './Components/ForgotPassword/ForgotPassword.jsx';
 
 import { AuthProvider } from './context/AuthContext';
-import { ThemeProvider } from './context/ThemeContext.js'; // <- Make sure this path is correct
-
-function PersonPage() {
-  const { email } = useParams();
-  return <h1>{email}</h1>;
-}
+import { ThemeProvider } from './context/ThemeContext.js';
 
 function App() {
   return (
@@ -35,7 +30,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="people" element={<People />} />
-            <Route path="people/:email" element={<PersonPage />} />
+            <Route path="people/:email" element={<PersonDetail />} />
             <Route path="login" element={<Login />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="about" element={<About />} />
