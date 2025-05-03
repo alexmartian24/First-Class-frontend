@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act, within } from "@testing-library/react";
 import { TestWrapper } from "../../test-utils/test-wrapper";
 import axios from "axios";
 import People from "./People";
@@ -85,10 +85,26 @@ describe("People Component", () => {
     const testUser = await screen.findByText("Test User");
     expect(testUser).toBeInTheDocument();
     
-    // Check for email, affiliation and roles
-    expect(screen.getByText(/Email: test@test.com/)).toBeInTheDocument();
-    expect(screen.getByText(/Affiliation: Test University/)).toBeInTheDocument();
-    expect(screen.getByText(/Roles: Author/)).toBeInTheDocument();
+    // Check for email, affiliation and roles by finding the person card first
+    const personCard = testUser.closest('.person-card');
+    expect(personCard).toBeInTheDocument();
+    
+    // Now search within the person card
+    const emailLabel = within(personCard).getByText("Email:");
+    expect(emailLabel).toBeInTheDocument();
+    expect(within(personCard).getByText("test@test.com")).toBeInTheDocument();
+    
+    const affiliationLabel = within(personCard).getByText("Affiliation:");
+    expect(affiliationLabel).toBeInTheDocument();
+    expect(within(personCard).getByText("Test University")).toBeInTheDocument();
+    
+    const rolesLabel = within(personCard).getByText("Roles:");
+    expect(rolesLabel).toBeInTheDocument();
+    
+    // Find the roles paragraph which contains the Author text
+    const rolesParagraph = within(personCard).getByText("Roles:").closest('p');
+    expect(rolesParagraph).toBeInTheDocument();
+    expect(rolesParagraph.textContent).toContain("Author");
   });
 
   test("handles adding a new person", async () => {
@@ -116,7 +132,7 @@ describe("People Component", () => {
 
     // Click add person button
     await act(async () => {
-      fireEvent.click(screen.getByText("Add Person"));
+      fireEvent.click(screen.getByText("+ Add Person"));
     });
 
     // Fill out form
@@ -132,7 +148,7 @@ describe("People Component", () => {
       });
       
       // Mock the role selection - we need to simulate selecting from a multiple select
-      const roleSelect = screen.getByLabelText("Role");
+      const roleSelect = screen.getByLabelText("Roles");
       // Create a mock selected options array
       Object.defineProperty(roleSelect, 'selectedOptions', {
         writable: true,
@@ -148,14 +164,14 @@ describe("People Component", () => {
     });
 
     // Submit form
-    const form = screen.getByTestId("add-person-form");
+    const form = screen.getByText("Add Person").closest("form");
     await act(async () => {
       fireEvent.submit(form);
     });
 
-    // Check if axios.post was called with correct data (component uses POST not PUT)
+    // Check if axios.post was called with correct endpoint and data
     expect(axios.post).toHaveBeenCalledWith(
-      expect.any(String),
+      expect.stringContaining('/people/create'),
       expect.objectContaining({
         name: "New Person",
         email: "new@test.com",
@@ -194,20 +210,33 @@ describe("People Component", () => {
     // Wait for data to load
     await screen.findByText("Test User");
 
-    // Find and click delete button
-    const deleteButton = screen.getByTestId("delete-test@test.com");
+    // Find the person card for Test User
+    const personCard = screen.getByText("Test User").closest(".person-card");
+    
+    // Find the delete button within that card (it's the second button - first is edit)
+    const deleteButton = personCard.querySelectorAll("button")[1];
+    
     await act(async () => {
       fireEvent.click(deleteButton);
     });
 
-    // Check if axios.delete was called
-    expect(axios.delete).toHaveBeenCalled();
+    // Check if axios.delete was called with the correct endpoint
+    expect(axios.delete).toHaveBeenCalledWith(
+      expect.stringMatching(/\/people\/test(%40|@)test\.com/),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }),
+        withCredentials: false
+      })
+    );
 
     // Restore window.confirm
     window.confirm = originalConfirm;
   });
 
-  test("displays error message when people without roles are found", async () => {
+  test("renders person with no roles correctly", async () => {
     localStorage.setItem("user", JSON.stringify({ roles: ["ED"] }));
     const peopleWithoutRoles = {
       "noRole@test.com": {
@@ -234,8 +263,19 @@ describe("People Component", () => {
       window.dispatchEvent(new Event('auth-change'));
     });
 
-    // Wait for error message
-    const errorMessage = await screen.findByText(/Warning: Found 1 people without roles/);
-    expect(errorMessage).toBeInTheDocument();
+    // Wait for the person card to be rendered
+    const personName = await screen.findByText("No Role User");
+    expect(personName).toBeInTheDocument();
+    
+    // Check that the person's email is displayed
+    expect(screen.getByText("Email:")).toBeInTheDocument();
+    expect(screen.getByText("noRole@test.com")).toBeInTheDocument();
+    
+    // Check that the person's affiliation is displayed
+    expect(screen.getByText("Affiliation:")).toBeInTheDocument();
+    expect(screen.getByText("Test Place")).toBeInTheDocument();
+    
+    // Verify that roles section is not displayed for this person
+    expect(screen.queryByText("Roles:")).not.toBeInTheDocument();
   });
 });

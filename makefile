@@ -3,7 +3,8 @@ github:
 	git push origin main
 
 all_tests:
-	npx jest
+	npm run test -- --silent || npx jest --silent
+
 
 cloud:
 	./cloud.sh
