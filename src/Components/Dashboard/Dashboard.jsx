@@ -33,8 +33,16 @@ const STATE_NAMES_ENDPOINT = `${BACKEND_URL}/manuscripts/state_names`;
 const VALID_STATES_ENDPOINT = `${BACKEND_URL}/manuscripts/valid_states`;
 
 function CreateManuscriptForm({ visible, cancel, setError, onSuccess }) {
+  const { user, setUser } = useAuth();
   const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
+  const [author, setAuthor] = useState(user?.email || '');
+
+  // Update author field when user changes
+  useEffect(() => {
+    if (user?.email) {
+      setAuthor(user.email);
+    }
+  }, [user]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -44,6 +52,20 @@ function CreateManuscriptForm({ visible, cancel, setError, onSuccess }) {
       .put(CREATE_MANUSCRIPT_ENDPOINT, manuscriptData, axiosConfig)
       .then((response) => {
         console.log('Manuscript created successfully:', response.data);
+        
+        // Check if the current user is the author and update their roles if needed
+        if (user && user.email === author && !user.roles.includes('AU')) {
+          // Update local user state with the AU role
+          const updatedUser = {
+            ...user,
+            roles: [...user.roles, 'AU']
+          };
+          
+          // Update user in context and localStorage
+          setUser(updatedUser);
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+        
         setTitle('');
         setAuthor('');
         if (onSuccess) onSuccess();
@@ -650,7 +672,7 @@ function Dashboard() {
         </div>
       )}
 
-      {isAuthorized && (
+      {(isAuthorized || isAuthor) && (
         <div className="dashboard-buttons">
           <button onClick={toggleCreateForm}>
             {showCreateForm ? 'Cancel Create' : 'Create New Manuscript'}
