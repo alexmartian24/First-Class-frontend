@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { BACKEND_URL } from '../../constants';
 
 const PEOPLE_NAME_ENDPOINT = (email) => `${BACKEND_URL}/people/name/${encodeURIComponent(email)}`;
+const AUTHOR_MANUSCRIPTS_ENDPOINT = (email) => `${BACKEND_URL}/manuscripts/${encodeURIComponent(email)}`;
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
@@ -408,6 +409,7 @@ function Dashboard() {
   const [editingManuscript, setEditingManuscript] = useState(null);
   const [manuscripts, setManuscripts] = useState([]);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isAuthor, setIsAuthor] = useState(false);
   const [authorNames, setAuthorNames] = useState({});
   const [stateNames, setStateNames] = useState({});
   const [viewMode, setViewMode] = useState('default'); // 'default', 'sorted', or state code
@@ -415,23 +417,30 @@ function Dashboard() {
   const [validStateOptions, setValidStateOptions] = useState([]);
 
   const fetchManuscripts = () => {
-    if (!isAuthorized) return;
+    if (!isAuthorized && !isAuthor) return;
     
     let endpoint;
-    switch (viewMode) {
-      case 'sorted':
-        endpoint = SORTED_MANUSCRIPTS_ENDPOINT;
-        break;
-      case 'default':
-        endpoint = FETCH_MANUSCRIPT_ENDPOINT;
-        break;
-      default:
-        // If viewMode is a state code
-        if (validStates.includes(viewMode)) {
-          endpoint = MANUSCRIPTS_BY_STATE_ENDPOINT(viewMode);
-        } else {
+    
+    // If user is an author but not an editor, always use author endpoint
+    if (isAuthor && !isAuthorized && user?.email) {
+      endpoint = AUTHOR_MANUSCRIPTS_ENDPOINT(user.email);
+    } else {
+      // For editors or combined roles, use the selected view mode
+      switch (viewMode) {
+        case 'sorted':
+          endpoint = SORTED_MANUSCRIPTS_ENDPOINT;
+          break;
+        case 'default':
           endpoint = FETCH_MANUSCRIPT_ENDPOINT;
-        }
+          break;
+        default:
+          // If viewMode is a state code
+          if (validStates.includes(viewMode)) {
+            endpoint = MANUSCRIPTS_BY_STATE_ENDPOINT(viewMode);
+          } else {
+            endpoint = FETCH_MANUSCRIPT_ENDPOINT;
+          }
+      }
     }
     
     axios
@@ -527,20 +536,34 @@ function Dashboard() {
 
   // Check user authorization on mount
   useEffect(() => {
-    if (!user || !isEditor()) {
+    // Check if user is an editor
+    if (user && isEditor()) {
+      setIsAuthorized(true);
+      setError('');
+    } else {
       setIsAuthorized(false);
-      setError('Please log in as an Editor or Managing Editor to view manuscripts.');
-      return;
     }
-    setIsAuthorized(true);
+    
+    // Check if user is an author (has email)
+    if (user && user.email) {
+      setIsAuthor(true);
+      setError('');
+    } else {
+      setIsAuthor(false);
+    }
+    
+    // If user is neither an editor nor an author, show error
+    if (!user || (!isEditor() && !user.email)) {
+      setError('Please log in to view manuscripts.');
+    }
   }, [user, isEditor]);
 
-  // Fetch manuscripts when authorized or viewMode changes
+  // Fetch manuscripts when authorized or author status changes or viewMode changes
   useEffect(() => {
-    if (isAuthorized) {
+    if (isAuthorized || isAuthor) {
       fetchManuscripts();
     }
-  }, [isAuthorized, viewMode]);
+  }, [isAuthorized, isAuthor, viewMode]);
 
   // Fetch author names for all manuscripts
   useEffect(() => {
@@ -627,11 +650,13 @@ function Dashboard() {
         </div>
       )}
 
-      <div className="dashboard-buttons">
-        <button onClick={toggleCreateForm}>
-          {showCreateForm ? 'Cancel Create' : 'Create New Manuscript'}
-        </button>
-      </div>
+      {isAuthorized && (
+        <div className="dashboard-buttons">
+          <button onClick={toggleCreateForm}>
+            {showCreateForm ? 'Cancel Create' : 'Create New Manuscript'}
+          </button>
+        </div>
+      )}
 
       <CreateManuscriptForm
         visible={showCreateForm}
@@ -651,50 +676,55 @@ function Dashboard() {
         />
       )}
 
+      {/* View controls - only for editors */}
       {isAuthorized && (
-        <>
-          <div className="view-controls">
-            <h3>View Options</h3>
-            <div className="view-buttons">
-              <button 
-                className={viewMode === 'default' ? 'active' : ''}
-                onClick={() => setViewMode('default')}
-              >
-                Default Order
-              </button>
-              <button 
-                className={viewMode === 'sorted' ? 'active' : ''}
-                onClick={() => setViewMode('sorted')}
-              >
-                Sort by State
-              </button>
-            </div>
-            
-            {validStateOptions.length > 0 && (
-              <div className="filter-controls">
-                <label htmlFor="stateFilter">Filter by State:</label>
-                <select 
-                  id="stateFilter" 
-                  value={validStates.includes(viewMode) ? viewMode : ''}
-                  onChange={(e) => setViewMode(e.target.value || 'default')}
-                >
-                  <option value="">-- Select State --</option>
-                  {validStateOptions.map(state => (
-                    <option key={state.code} value={state.code}>
-                      {state.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+        <div className="view-controls">
+          <h3>View Options</h3>
+          <div className="view-buttons">
+            <button 
+              className={viewMode === 'default' ? 'active' : ''}
+              onClick={() => setViewMode('default')}
+            >
+              Default Order
+            </button>
+            <button 
+              className={viewMode === 'sorted' ? 'active' : ''}
+              onClick={() => setViewMode('sorted')}
+            >
+              Sort by State
+            </button>
           </div>
           
+          {validStateOptions.length > 0 && (
+            <div className="filter-controls">
+              <label htmlFor="stateFilter">Filter by State:</label>
+              <select 
+                id="stateFilter" 
+                value={validStates.includes(viewMode) ? viewMode : ''}
+                onChange={(e) => setViewMode(e.target.value || 'default')}
+              >
+                <option value="">-- Select State --</option>
+                {validStateOptions.map(state => (
+                  <option key={state.code} value={state.code}>
+                    {state.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* Manuscripts list - for both editors and authors */}
+      {(isAuthorized || isAuthor) && (
+        <>
           {manuscripts.length > 0 ? (
             <div className="manuscripts-list">
               <h2>
-                {viewMode === 'default' && 'All Manuscripts'}
-                {viewMode === 'sorted' && 'Manuscripts Sorted by State'}
-                {validStates.includes(viewMode) && `Manuscripts in State: ${stateNames[viewMode] || viewMode}`}
+                {isAuthor && !isAuthorized && 'Your Manuscripts'}
+                {isAuthorized && viewMode === 'default' && 'All Manuscripts'}
+                {isAuthorized && viewMode === 'sorted' && 'Manuscripts Sorted by State'}
+                {isAuthorized && validStates.includes(viewMode) && `Manuscripts in State: ${stateNames[viewMode] || viewMode}`}
               </h2>
               <table className="manuscripts-table">
                 <thead>
@@ -703,7 +733,7 @@ function Dashboard() {
                     <th>Title</th>
                     <th>Author</th>
                     <th>State</th>
-                    <th>Actions</th>
+                    {isAuthorized && <th>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -721,16 +751,18 @@ function Dashboard() {
                           {stateNames[manuscript.curr_state] || manuscript.curr_state}
                         </span>
                       </td>
-                      <td>
-                        <div className="action-buttons">
-                          <button onClick={() => handleEdit(manuscript)}>
-                            <FontAwesomeIcon icon={faPencilAlt} />
-                          </button>
-                          <button onClick={() => handleDelete(manuscript)}>
-                            <FontAwesomeIcon icon={faTrashAlt} />
-                          </button>
-                        </div>
-                      </td>
+                      {isAuthorized && (
+                        <td>
+                          <div className="action-buttons">
+                            <button onClick={() => handleEdit(manuscript)}>
+                              <FontAwesomeIcon icon={faPencilAlt} />
+                            </button>
+                            <button onClick={() => handleDelete(manuscript)}>
+                              <FontAwesomeIcon icon={faTrashAlt} />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
