@@ -25,10 +25,9 @@ function Settings() {
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const toggleNotifications = () => setNotifications(!notifications);
-
+  const toggleNotifications = () => setNotifications((prev) => !prev);
   const handleLanguageChange = (e) => setLanguage(e.target.value);
-  
+
   const handleDevInfoClick = () => {
     axios
       .get(`${BACKEND_URL}/dev/info`, axiosConfig)
@@ -41,7 +40,7 @@ function Settings() {
         alert("Error fetching dev info.");
       });
   };
-  
+
   const openPasswordModal = () => {
     const user = localStorage.getItem("user");
     if (!user) {
@@ -67,30 +66,31 @@ function Settings() {
     setPasswordSuccess("");
     setIsSubmitting(true);
 
-    if (!passwords.current || !passwords.new || !passwords.confirm) {
+    const { current, new: newPass, confirm } = passwords;
+    if (!current || !newPass || !confirm) {
       setPasswordError("All fields are required");
       setIsSubmitting(false);
       return;
     }
-    if (passwords.new !== passwords.confirm) {
+    if (newPass !== confirm) {
       setPasswordError("New passwords don't match");
       setIsSubmitting(false);
       return;
     }
-    if (passwords.new.length < 8) {
+    if (newPass.length < 8) {
       setPasswordError("Password must be at least 8 characters long");
       setIsSubmitting(false);
       return;
     }
 
     const user = JSON.parse(localStorage.getItem("user"));
-    if (!user || !user.email) {
+    if (!user?.email) {
       setPasswordError("You must be logged in to change your password");
       setIsSubmitting(false);
       return;
     }
 
-    const verifyPayload = { email: user.email, password: passwords.current };
+    const verifyPayload = { email: user.email, password: current };
 
     axios
       .post(`${BACKEND_URL}/people/login`, verifyPayload, axiosConfig)
@@ -99,8 +99,8 @@ function Settings() {
           name: user.name,
           email: user.email,
           affiliation: user.affiliation,
-          role: user.roles?.[0] || '',
-          password: passwords.new,
+          role: user.roles?.[0] || "",
+          password: newPass,
         };
         return axios.put(PEOPLE_UPDATE_ENDPOINT(user.email), updatedPerson, axiosConfig);
       })
@@ -116,9 +116,7 @@ function Settings() {
           setPasswordError(`Failed to update password: ${error.message}`);
         }
       })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+      .finally(() => setIsSubmitting(false));
   };
 
   const renderToggleSwitch = (checked, onChange) => (
@@ -136,41 +134,23 @@ function Settings() {
         <div className="modal">
           <div className="modal-header">
             <h2>Change Password</h2>
-            <button className="close-button" onClick={closePasswordModal}>
-              ×
-            </button>
+            <button className="close-button" onClick={closePasswordModal}>×</button>
           </div>
           <form onSubmit={handlePasswordSubmit}>
-            <div className="form-group">
-              <label htmlFor="current">Current Password</label>
-              <input
-                type="password"
-                id="current"
-                name="current"
-                value={passwords.current}
-                onChange={handlePasswordChange}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="new">New Password</label>
-              <input
-                type="password"
-                id="new"
-                name="new"
-                value={passwords.new}
-                onChange={handlePasswordChange}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="confirm">Confirm New Password</label>
-              <input
-                type="password"
-                id="confirm"
-                name="confirm"
-                value={passwords.confirm}
-                onChange={handlePasswordChange}
-              />
-            </div>
+            {["current", "new", "confirm"].map((field) => (
+              <div key={field} className="form-group">
+                <label htmlFor={field}>
+                  {field === "confirm" ? "Confirm New Password" : `${field.charAt(0).toUpperCase() + field.slice(1)} Password`}
+                </label>
+                <input
+                  type="password"
+                  id={field}
+                  name={field}
+                  value={passwords[field]}
+                  onChange={handlePasswordChange}
+                />
+              </div>
+            ))}
             {passwordError && <div className="error-message">{passwordError}</div>}
             {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
             <div className="modal-footer">
@@ -229,12 +209,9 @@ function Settings() {
               <p>Choose your preferred language</p>
             </div>
             <select value={language} onChange={handleLanguageChange}>
-              <option value="English">English</option>
-              <option value="Spanish">Spanish</option>
-              <option value="French">French</option>
-              <option value="Korean">Korean</option>
-              <option value="Japanese">Japanese</option>
-              <option value="German">German</option>
+              {["English", "Spanish", "French", "Korean", "Japanese", "German"].map((lang) => (
+                <option key={lang} value={lang}>{lang}</option>
+              ))}
             </select>
           </div>
         </section>
@@ -242,30 +219,17 @@ function Settings() {
         <section className="settings-section">
           <h2>Account</h2>
           <div className="account-actions">
-            <button className="button primary" onClick={openPasswordModal}>
-              Change Password
-            </button>
-            <button
-              className="button secondary"
-              onClick={() => console.debug("Two-Factor Authentication clicked")}
-            >
+            <button className="button primary" onClick={openPasswordModal}>Change Password</button>
+            <button className="button secondary" onClick={() => console.debug("Two-Factor Authentication clicked")}>
               Two-Factor Authentication
             </button>
-            <button
-              className="button secondary"
-              onClick={handleDevInfoClick}
-            >
-              Fetch /dev/info
-            </button>
+            <button className="button secondary" onClick={handleDevInfoClick}>Fetch /dev/info</button>
           </div>
 
           <div className="danger-zone">
             <h3 className="danger-title">Danger Zone</h3>
             <p className="danger-description">This action cannot be undone.</p>
-            <button
-              className="button danger"
-              onClick={() => console.debug("Delete Account clicked")}
-            >
+            <button className="button danger" onClick={() => console.debug("Delete Account clicked")}>
               Delete Account
             </button>
           </div>
