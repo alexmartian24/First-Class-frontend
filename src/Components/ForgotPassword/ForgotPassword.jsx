@@ -7,6 +7,8 @@ function ForgotPassword() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -15,11 +17,21 @@ function ForgotPassword() {
       setError('Please enter your NYU email.');
       return;
     }
+    setIsLoading(true); 
+    const emailRegex = /^[^\s@]+@nyu\.edu$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid NYU email address (e.g., netid@nyu.edu).');
+      return;
+}
+
+    
+
 
     // Simulate API call
     setTimeout(() => {
       setMessage('Password reset instructions have been sent to your email.');
       setError('');
+      setIsLoading(false); 
     }, 1000);
   };
 
@@ -48,7 +60,9 @@ function ForgotPassword() {
         </div>
 
         <div className="form-actions">
-          <button type="submit">Send Reset Link</button>
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? "Sending..." : "Send Reset Link"}
+        </button>        
         </div>
 
         <div className="additional-links">
