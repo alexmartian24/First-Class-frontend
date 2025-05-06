@@ -8,6 +8,7 @@ function About() {
   const { isEditor } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [saveMessage, setSaveMessage] = useState('');
   const [aboutData, setAboutData] = useState({
     header: {
       title: 'About This Project',
@@ -119,6 +120,8 @@ function About() {
       
       await Promise.all(savePromises);
       setIsEditing(false);
+      setSaveMessage('Changes saved successfully.'); 
+      setTimeout(() => setSaveMessage(''), 3000);
     } catch (error) {
       console.error('Error saving content:', error);
     }
@@ -142,6 +145,7 @@ function About() {
 
   return (
     <div className="about-container">
+      {saveMessage && <div className="save-message">{saveMessage}</div>}
       {isLoading ? (
         <div className="loading">Loading...</div>
       ) : (
