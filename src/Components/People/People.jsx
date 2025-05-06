@@ -1,6 +1,5 @@
 // src/Components/People/People.jsx
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './People.css';
@@ -10,7 +9,6 @@ import { useAuth } from '../../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
-// Axios configuration for cross-origin requests
 const axiosConfig = {
   headers: {
     'Content-Type': 'application/json',
@@ -19,306 +17,132 @@ const axiosConfig = {
   withCredentials: false,
 };
 
-const PEOPLE_READ_ENDPOINT   = `${BACKEND_URL}/people`;
+const PEOPLE_READ_ENDPOINT = `${BACKEND_URL}/people`;
 const PEOPLE_CREATE_ENDPOINT = `${BACKEND_URL}/people/create`;
 const PEOPLE_UPDATE_ENDPOINT = (email) => `${BACKEND_URL}/people/${encodeURIComponent(email)}`;
 const PEOPLE_DELETE_ENDPOINT = (email) => `${BACKEND_URL}/people/${encodeURIComponent(email)}`;
 
-/**
- * AddPersonForm
- */
-function AddPersonForm({ visible, cancel, fetchPeople, setError }) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [affiliation, setAffiliation] = useState('');
-  const [roles, setRoles] = useState([]);
+function RoleSelect({ value, onChange, options }) {
+  return (
+    <select multiple value={value} onChange={onChange}>
+      {options.map((r) => (
+        <option key={r} value={r}>{r}</option>
+      ))}
+    </select>
+  );
+}
+
+function PersonForm({ visible, onSubmit, cancel, initialData = {}, isEdit = false, setError }) {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    affiliation: '',
+    roles: [],
+    password: '',
+  });
   const [availableRoles, setAvailableRoles] = useState([]);
   const [roleMapping, setRoleMapping] = useState({});
-  const [password, setPassword] = useState('');
 
   useEffect(() => {
     if (!visible) return;
-    axios
-      .get(`${BACKEND_URL}/roles`, axiosConfig)
-      .then((response) => {
-        setRoleMapping(response.data);
-        setAvailableRoles(Object.values(response.data));
+    axios.get(`${BACKEND_URL}/roles`, axiosConfig)
+      .then((res) => {
+        setRoleMapping(res.data);
+        setAvailableRoles(Object.values(res.data));
       })
-      .catch((error) => {
-        console.error('Error fetching roles:', error);
-      });
+      .catch((err) => console.error('Error fetching roles:', err));
   }, [visible]);
 
-  // Reset form when opened
   useEffect(() => {
     if (visible) {
-      setName('');
-      setEmail('');
-      setAffiliation('');
-      setRoles([]);
-      setPassword('');
+      const prefill = {
+        name: initialData.name || '',
+        email: initialData.email || '',
+        affiliation: initialData.affiliation || '',
+        roles: (initialData.roles || []).map((code) => initialData?.roleMapping?.[code] || code),
+        password: '',
+      };
+      setFormData(prefill);
       setError('');
     }
-  }, [visible, setError]);
+  }, [visible, initialData, setError]);
 
   if (!visible) return null;
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRolesChange = (e) => {
+    const selected = Array.from(e.target.selectedOptions, (opt) => opt.value);
+    setFormData((prev) => ({ ...prev, roles: selected }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name || !email || !affiliation || roles.length === 0 || !password) {
+    const { name, email, affiliation, roles, password } = formData;
+    if (!name || !email || !affiliation || roles.length === 0 || (!isEdit && !password)) {
       setError('All fields are required.');
       return;
     }
-
-    const roleCodes = roles
-      .map((roleName) =>
-        Object.keys(roleMapping).find((code) => roleMapping[code] === roleName)
-      )
-      .filter(Boolean);
-
-    const newPerson = {
+    const roleCodes = roles.map((roleName) => Object.keys(roleMapping).find((code) => roleMapping[code] === roleName)).filter(Boolean);
+    const personPayload = {
       name,
       email,
       affiliation,
       roles: roleCodes,
-      password: 'simulated_hashed_' + password,
+      ...(isEdit ? {} : { password: 'simulated_hashed_' + password }),
     };
 
-    axios
-      .post(PEOPLE_CREATE_ENDPOINT, newPerson, axiosConfig)
-      .then(() => {
-        fetchPeople();
-        cancel();
-      })
-      .catch((error) => setError(`There was a problem adding the person: ${error.message}`));
+    onSubmit(personPayload);
   };
 
   return (
     <div className="modal-overlay">
       <form className="person-form" onSubmit={handleSubmit}>
-        <h3>Add Person</h3>
-
-        <label htmlFor="add-name">Name</label>
-        <input
-          id="add-name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-
-        <label htmlFor="add-email">Email</label>
-        <input
-          id="add-email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <label htmlFor="add-affiliation">Affiliation</label>
-        <input
-          id="add-affiliation"
-          type="text"
-          value={affiliation}
-          onChange={(e) => setAffiliation(e.target.value)}
-        />
-
-        <label htmlFor="add-roles">Roles</label>
-        <select
-          id="add-roles"
-          multiple
-          value={roles}
-          onChange={(e) => {
-            const sel = Array.from(e.target.selectedOptions, (opt) => opt.value);
-            setRoles(sel);
-          }}
-        >
-          {availableRoles.map((r) => (
-            <option key={r} value={r}>{r}</option>
-          ))}
-        </select>
-
-        <label htmlFor="add-password">Password</label>
-        <input
-          id="add-password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-
+        <h3>{isEdit ? 'Edit Person' : 'Add Person'}</h3>
+        <label>Name</label>
+        <input name="name" type="text" value={formData.name} onChange={handleChange} />
+        <label>Email</label>
+        <input name="email" type="email" value={formData.email} onChange={handleChange} />
+        <label>Affiliation</label>
+        <input name="affiliation" type="text" value={formData.affiliation} onChange={handleChange} />
+        <label>Roles</label>
+        <RoleSelect value={formData.roles} onChange={handleRolesChange} options={availableRoles} />
+        {!isEdit && (
+          <>
+            <label>Password</label>
+            <input name="password" type="password" value={formData.password} onChange={handleChange} />
+          </>
+        )}
         <div className="form-buttons">
           <button type="button" className="cancel" onClick={cancel}>Cancel</button>
-          <button type="submit" className="save">Add</button>
+          <button type="submit" className="save">{isEdit ? 'Save' : 'Add'}</button>
         </div>
       </form>
     </div>
   );
 }
 
-AddPersonForm.propTypes = {
-  visible: PropTypes.bool.isRequired,
-  cancel: PropTypes.func.isRequired,
-  fetchPeople: PropTypes.func.isRequired,
-  setError: PropTypes.func.isRequired,
-};
-
-/**
- * EditPersonForm
- */
-function EditPersonForm({ visible, person, cancel, fetchPeople, setError }) {
-  const [name, setName] = useState('');
-  const [newEmail, setNewEmail] = useState('');
-  const [affiliation, setAffiliation] = useState('');
-  const [roles, setRoles] = useState([]);
-  const [availableRoles, setAvailableRoles] = useState([]);
-  const [roleMapping, setRoleMapping] = useState({});
-
-  useEffect(() => {
-    if (!visible) return;
-    axios
-      .get(`${BACKEND_URL}/roles`, axiosConfig)
-      .then((response) => {
-        setRoleMapping(response.data);
-        setAvailableRoles(Object.values(response.data));
-      })
-      .catch((error) => console.error('Error fetching roles:', error));
-  }, [visible]);
-
-  useEffect(() => {
-    if (visible && person && Object.keys(roleMapping).length) {
-      setName(person.name || '');
-      setNewEmail(person.email || '');
-      setAffiliation(person.affiliation || '');
-      const rn = (person.roles || []).map((code) => roleMapping[code] || code);
-      setRoles(rn);
-    }
-  }, [visible, person, roleMapping]);
-
-  if (!visible || !person) return null;
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!name || !newEmail || !affiliation || roles.length === 0) {
-      setError('All fields are required.');
-      return;
-    }
-
-    const roleCodes = roles
-      .map((roleName) =>
-        Object.keys(roleMapping).find((code) => roleMapping[code] === roleName)
-      )
-      .filter(Boolean);
-
-    const updated = {
-      name,
-      email: newEmail,
-      affiliation,
-      roles: roleCodes,
-    };
-
-    axios
-      .put(PEOPLE_UPDATE_ENDPOINT(person.email), updated, axiosConfig)
-      .then(() => {
-        fetchPeople();
-        cancel();
-      })
-      .catch((error) => setError(`There was a problem updating: ${error.message}`));
-  };
-
-  return (
-    <div className="modal-overlay">
-      <form className="person-form" onSubmit={handleSubmit}>
-        <h3>Edit Person</h3>
-
-        <label htmlFor="edit-name">Name</label>
-        <input
-          id="edit-name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-
-        <label htmlFor="edit-email">Email</label>
-        <input
-          id="edit-email"
-          type="email"
-          value={newEmail}
-          onChange={(e) => setNewEmail(e.target.value)}
-        />
-
-        <label htmlFor="edit-affiliation">Affiliation</label>
-        <input
-          id="edit-affiliation"
-          type="text"
-          value={affiliation}
-          onChange={(e) => setAffiliation(e.target.value)}
-        />
-
-        <label htmlFor="edit-roles">Roles</label>
-        <select
-          id="edit-roles"
-          multiple
-          value={roles}
-          onChange={(e) => {
-            const sel = Array.from(e.target.selectedOptions, (opt) => opt.value);
-            setRoles(sel);
-          }}
-        >
-          {availableRoles.map((r) => (
-            <option key={r} value={r}>{r}</option>
-          ))}
-        </select>
-
-        <div className="form-buttons">
-          <button type="button" className="cancel" onClick={cancel}>Cancel</button>
-          <button type="submit" className="save">Save</button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-EditPersonForm.propTypes = {
-  visible: PropTypes.bool.isRequired,
-  person: PropTypes.shape({
-    name: PropTypes.string,
-    email: PropTypes.string.isRequired,
-    affiliation: PropTypes.string,
-    roles: PropTypes.arrayOf(PropTypes.string).isRequired,
-  }),
-  cancel: PropTypes.func.isRequired,
-  fetchPeople: PropTypes.func.isRequired,
-  setError: PropTypes.func.isRequired,
-};
-
-/**
- * ErrorMessage
- */
 function ErrorMessage({ message }) {
   if (!message) return null;
   return <div className="error-message">{message}</div>;
 }
-ErrorMessage.propTypes = {
-  message: PropTypes.string,
-};
 
-/**
- * Person
- */
 function Person({ person, fetchPeople, setError, onEdit }) {
   const { name, email, affiliation, roles } = person;
   const [roleMapping, setRoleMapping] = useState({});
 
   useEffect(() => {
-    axios
-      .get(`${BACKEND_URL}/roles`, axiosConfig)
+    axios.get(`${BACKEND_URL}/roles`, axiosConfig)
       .then((res) => setRoleMapping(res.data))
       .catch((err) => console.error('Error fetching roles:', err));
   }, []);
 
   const handleDelete = () => {
     if (!window.confirm(`Delete ${name || email}?`)) return;
-    axios
-      .delete(PEOPLE_DELETE_ENDPOINT(email), axiosConfig)
+    axios.delete(PEOPLE_DELETE_ENDPOINT(email), axiosConfig)
       .then(() => fetchPeople())
       .catch((err) => setError(`Failed to delete: ${err.message}`));
   };
@@ -326,19 +150,13 @@ function Person({ person, fetchPeople, setError, onEdit }) {
   return (
     <div className="person-card">
       <div className="person-card-header">
-        <h2>
-          <Link to={`/people/${encodeURIComponent(email)}`}>{name || 'Unnamed'}</Link>
-        </h2>
+        <h2><Link to={`/people/${encodeURIComponent(email)}`}>{name || 'Unnamed'}</Link></h2>
       </div>
-
       <div className="person-card-body">
         <p><strong>Email:</strong> {email}</p>
         {affiliation && <p><strong>Affiliation:</strong> {affiliation}</p>}
-        {roles?.length > 0 && (
-          <p><strong>Roles:</strong> {roles.map(c => roleMapping[c] || c).join(', ')}</p>
-        )}
+        {roles?.length > 0 && <p><strong>Roles:</strong> {roles.map((c) => roleMapping[c] || c).join(', ')}</p>}
       </div>
-
       <div className="person-card-actions">
         <button className="action-btn edit" onClick={() => onEdit(person)}>
           <FontAwesomeIcon icon={faPencilAlt} />
@@ -351,27 +169,12 @@ function Person({ person, fetchPeople, setError, onEdit }) {
   );
 }
 
-Person.propTypes = {
-  person: PropTypes.shape({
-    name: PropTypes.string,
-    email: PropTypes.string.isRequired,
-    affiliation: PropTypes.string,
-    roles: PropTypes.arrayOf(PropTypes.string).isRequired,
-  }).isRequired,
-  fetchPeople: PropTypes.func.isRequired,
-  setError: PropTypes.func.isRequired,
-  onEdit: PropTypes.func.isRequired,
-};
-
-/**
- * People (main)
- */
 export default function People() {
   const { user, isEditor } = useAuth();
-  const [people, setPeople]   = useState([]);
-  const [error, setError]     = useState('');
+  const [people, setPeople] = useState([]);
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [adding, setAdding]   = useState(false);
+  const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState(null);
 
   useEffect(() => {
@@ -385,44 +188,51 @@ export default function People() {
 
   const fetchPeople = () => {
     setLoading(true);
-    axios
-      .get(PEOPLE_READ_ENDPOINT, axiosConfig)
-      .then((res) => {
-        const arr = Object.values(res.data || {});
-        setPeople(arr);
-      })
+    axios.get(PEOPLE_READ_ENDPOINT, axiosConfig)
+      .then((res) => setPeople(Object.values(res.data || {})))
       .catch((err) => setError(`Failed to load: ${err.message}`))
       .finally(() => setLoading(false));
   };
 
+  const handleAdd = (data) => {
+    axios.post(PEOPLE_CREATE_ENDPOINT, data, axiosConfig)
+      .then(() => { fetchPeople(); setAdding(false); })
+      .catch((err) => setError(`Failed to add: ${err.message}`));
+  };
+
+  const handleEdit = (data) => {
+    axios.put(PEOPLE_UPDATE_ENDPOINT(editing.email), data, axiosConfig)
+      .then(() => { fetchPeople(); setEditing(null); })
+      .catch((err) => setError(`Failed to update: ${err.message}`));
+  };
+
   if (loading) return <div className="people-container"><p>Loading…</p></div>;
-  if (error)   return <div className="people-container"><ErrorMessage message={error}/></div>;
+  if (error) return <div className="people-container"><ErrorMessage message={error} /></div>;
 
   return (
     <div className="people-container">
       <div className="people-header">
         <h1>People</h1>
-        <button
-          className="add-person-button"
-          onClick={() => { setAdding(true); setEditing(null); }}
-        >
+        <button className="add-person-button" onClick={() => { setAdding(true); setEditing(null); }}>
           + Add Person
         </button>
       </div>
-
       <ErrorMessage message={error} />
 
-      <AddPersonForm
+      <PersonForm
         visible={adding}
+        onSubmit={handleAdd}
         cancel={() => setAdding(false)}
         fetchPeople={fetchPeople}
         setError={setError}
       />
 
-      <EditPersonForm
+      <PersonForm
         visible={!!editing}
-        person={editing}
+        onSubmit={handleEdit}
         cancel={() => setEditing(null)}
+        initialData={editing}
+        isEdit={true}
         fetchPeople={fetchPeople}
         setError={setError}
       />
