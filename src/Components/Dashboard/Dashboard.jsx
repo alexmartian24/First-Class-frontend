@@ -1,3 +1,5 @@
+// src/Components/Dashboard/Dashboard.jsx
+
 import React, { useState, useEffect } from 'react';
 import propTypes from 'prop-types';
 import axios from 'axios';
@@ -7,8 +9,10 @@ import { useAuth } from '../../context/AuthContext';
 
 import { BACKEND_URL } from '../../constants';
 
-const PEOPLE_NAME_ENDPOINT = (email) => `${BACKEND_URL}/people/name/${encodeURIComponent(email)}`;
-const AUTHOR_MANUSCRIPTS_ENDPOINT = (email) => `${BACKEND_URL}/manuscripts/${encodeURIComponent(email)}`;
+const PEOPLE_NAME_ENDPOINT = (email) =>
+  `${BACKEND_URL}/people/name/${encodeURIComponent(email)}`;
+const AUTHOR_MANUSCRIPTS_ENDPOINT = (email) =>
+  `${BACKEND_URL}/manuscripts/${encodeURIComponent(email)}`;
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
@@ -16,7 +20,7 @@ import { faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 const axiosConfig = {
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    Accept: 'application/json'
   },
   withCredentials: false
 };
@@ -25,8 +29,10 @@ const RECEIVE_ACTION_ENDPOINT = `${BACKEND_URL}/manuscripts/receive_action`;
 const CREATE_MANUSCRIPT_ENDPOINT = `${BACKEND_URL}/manuscripts/create`;
 const FETCH_MANUSCRIPT_ENDPOINT = `${BACKEND_URL}/manuscripts`;
 const SORTED_MANUSCRIPTS_ENDPOINT = `${BACKEND_URL}/manuscripts/sorted`;
-const MANUSCRIPTS_BY_STATE_ENDPOINT = (state) => `${BACKEND_URL}/manuscripts/state/${encodeURIComponent(state)}`;
-const DELETE_MANUSCRIPT_ENDPOINT = (id) => `${BACKEND_URL}/manuscripts/delete/${encodeURIComponent(id)}`;
+const MANUSCRIPTS_BY_STATE_ENDPOINT = (state) =>
+  `${BACKEND_URL}/manuscripts/state/${encodeURIComponent(state)}`;
+const DELETE_MANUSCRIPT_ENDPOINT = (id) =>
+  `${BACKEND_URL}/manuscripts/delete/${encodeURIComponent(id)}`;
 
 // State names will be fetched from the backend
 const STATE_NAMES_ENDPOINT = `${BACKEND_URL}/manuscripts/state_names`;
@@ -52,20 +58,17 @@ function CreateManuscriptForm({ visible, cancel, setError, onSuccess }) {
       .put(CREATE_MANUSCRIPT_ENDPOINT, manuscriptData, axiosConfig)
       .then((response) => {
         console.log('Manuscript created successfully:', response.data);
-        
-        // Check if the current user is the author and update their roles if needed
+
+        // If the current user is the author and has no AU role, add it
         if (user && user.email === author && !user.roles.includes('AU')) {
-          // Update local user state with the AU role
           const updatedUser = {
             ...user,
             roles: [...user.roles, 'AU']
           };
-          
-          // Update user in context and localStorage
           setUser(updatedUser);
           localStorage.setItem('user', JSON.stringify(updatedUser));
         }
-        
+
         setTitle('');
         setAuthor('');
         if (onSuccess) onSuccess();
@@ -115,13 +118,11 @@ CreateManuscriptForm.propTypes = {
   visible: propTypes.bool.isRequired,
   cancel: propTypes.func.isRequired,
   setError: propTypes.func.isRequired,
-  onSuccess: propTypes.func,
+  onSuccess: propTypes.func
 };
 
 function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscripts, stateNames }) {
-  // Ensure stateNames is an object
   const stateNamesObj = stateNames && !Array.isArray(stateNames) ? stateNames : {};
-  // Initialize with manuscript ID if provided
   const manuscriptId = manuscript?.manu_id || '';
   const currentState = manuscript?.curr_state || '';
   const [newState, setNewState] = useState('');
@@ -129,14 +130,11 @@ function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscrip
   const [refereesList, setRefereesList] = useState([]);
 
   const [actionMapping, setActionMapping] = useState({});
-  
-  // Fetch available actions from backend
+
   useEffect(() => {
     axios
       .get(`${BACKEND_URL}/manuscripts/state_transitions`, axiosConfig)
-      .then((response) => {
-        setActionMapping(response.data);
-      })
+      .then((response) => setActionMapping(response.data))
       .catch((error) => {
         console.error('Failed to fetch action mapping:', error);
         setError('Failed to load available state transitions');
@@ -145,20 +143,19 @@ function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscrip
 
   useEffect(() => {
     if (manuscript) {
-      setNewState(''); // Reset new state when manuscript changes
+      setNewState('');
     }
   }, [manuscript]);
 
-    // fetch the list of referees once when the form mounts
-    useEffect(() => {
-      axios
-        .get(`${BACKEND_URL}/people/referees`, axiosConfig)
-        .then(({ data }) => setRefereesList(data))
-        .catch(err => {
-          console.error('Failed to load referees:', err);
-          setError('Could not load referees list');
-        });
-    }, []);
+  useEffect(() => {
+    axios
+      .get(`${BACKEND_URL}/people/referees`, axiosConfig)
+      .then(({ data }) => setRefereesList(data))
+      .catch((err) => {
+        console.error('Failed to load referees:', err);
+        setError('Could not load referees list');
+      });
+  }, []);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -166,13 +163,12 @@ function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscrip
       manu_id: manuscriptId,
       curr_state: currentState,
       action: newState,
-      referee: refereeEmail || undefined,
+      referee: refereeEmail || undefined
     };
 
     axios
       .put(RECEIVE_ACTION_ENDPOINT, actionData, axiosConfig)
-      .then((response) => {
-        console.log('Manuscript state updated:', response.data);
+      .then(() => {
         cancel();
         fetchManuscripts();
       })
@@ -186,8 +182,10 @@ function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscrip
       });
   };
 
-  // Get available actions for current state from backend mapping
-  const availableActions = currentState && actionMapping[currentState] ? actionMapping[currentState] : [];
+  const availableActions =
+    currentState && actionMapping[currentState]
+      ? actionMapping[currentState]
+      : [];
 
   if (!visible) return null;
 
@@ -225,7 +223,6 @@ function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscrip
           value={newState}
           onChange={(e) => {
             setNewState(e.target.value);
-            // Clear referee email when changing state unless it's DRF/ARF
             if (e.target.value !== 'DRF' && e.target.value !== 'ARF') {
               setRefereeEmail('');
             }
@@ -240,18 +237,17 @@ function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscrip
         </select>
       </div>
 
-
       {(newState === 'DRF' || newState === 'ARF') && (
         <div className="form-group">
           <label htmlFor="refereeEmail">Referee Email</label>
           <select
             id="refereeEmail"
             value={refereeEmail}
-            onChange={e => setRefereeEmail(e.target.value)}
+            onChange={(e) => setRefereeEmail(e.target.value)}
             required
           >
             <option value="">— Select a referee —</option>
-            {refereesList.map(email => (
+            {refereesList.map((email) => (
               <option key={email} value={email}>
                 {email}
               </option>
@@ -261,9 +257,11 @@ function ChangeStateForm({ visible, manuscript, cancel, setError, fetchManuscrip
       )}
 
       <div className="form-buttons">
-        <button type="button" onClick={cancel}>Cancel</button>
-        <button 
-          type="submit" 
+        <button type="button" onClick={cancel}>
+          Cancel
+        </button>
+        <button
+          type="submit"
           onClick={handleSubmit}
           disabled={!manuscriptId || !currentState || !newState}
         >
@@ -280,47 +278,41 @@ ChangeStateForm.propTypes = {
   cancel: propTypes.func.isRequired,
   setError: propTypes.func.isRequired,
   fetchManuscripts: propTypes.func.isRequired,
-  stateNames: propTypes.oneOfType([
-    propTypes.object,
-    propTypes.array
-  ]),
+  stateNames: propTypes.oneOfType([propTypes.object, propTypes.array])
 };
 
 function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManuscriptId }) {
-  // Use "SUB" as default, since in query.py SUBMITTED is defined as "SUB"
   const [currentState, setCurrentState] = useState('SUB');
   const [action, setAction] = useState('');
   const [referee, setReferee] = useState('');
   const [actionMapping, setActionMapping] = useState({});
 
-  // Fetch the state transitions mapping from the backend
   useEffect(() => {
     axios
       .get(`${BACKEND_URL}/manuscripts/state_transitions`, axiosConfig)
       .then((response) => {
-        console.log("Fetched state transitions:", response.data);  // Debug: log mapping
         setActionMapping(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching state transitions:", error);
+        console.error('Error fetching state transitions:', error);
       });
   }, []);
 
-  // Derive available states from the fetched mapping; fallback uses state codes.
-  const availableStates = Object.keys(actionMapping).length > 0
-    ? Object.keys(actionMapping)
-    : ['SUB', 'REV', 'AUR', 'CED', 'FMT', 'PUB', 'REJ', 'WIT', 'EDR'];
+  const availableStates =
+    Object.keys(actionMapping).length > 0
+      ? Object.keys(actionMapping)
+      : ['SUB', 'REV', 'AUR', 'CED', 'FMT', 'PUB', 'REJ', 'WIT', 'EDR'];
 
-  const changeManuscriptId = (event) => { setManuscriptId(event.target.value); };
-  const changeCurrentState = (event) => {
-    setCurrentState(event.target.value);
-    setAction(''); // Reset action when state changes
+  const changeManuscriptId = (e) => setManuscriptId(e.target.value);
+  const changeCurrentState = (e) => {
+    setCurrentState(e.target.value);
+    setAction('');
   };
-  const changeAction = (event) => { setAction(event.target.value); };
-  const changeReferee = (event) => { setReferee(event.target.value); };
+  const changeAction = (e) => setAction(e.target.value);
+  const changeReferee = (e) => setReferee(e.target.value);
 
-  const submitAction = (event) => {
-    event.preventDefault();
+  const submitAction = (e) => {
+    e.preventDefault();
     if (!manuscriptId.trim()) {
       setError('Manuscript ID is required.');
       return;
@@ -329,23 +321,23 @@ function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManu
       manu_id: manuscriptId,
       curr_state: currentState,
       action,
-      referee: referee || undefined,
+      referee: referee || undefined
     };
 
     axios
       .put(RECEIVE_ACTION_ENDPOINT, actionData, axiosConfig)
-      .then((response) => {
-        console.log('Action successful:', response.data);
+      .then(() => {
         setManuscriptId('');
-        // Reset current state to first available state from the mapping
         setCurrentState(availableStates[0] || 'SUB');
         setAction('');
         setReferee('');
       })
       .catch((error) => {
-        setError(`There was a problem performing the action: ${
-          error.response?.data?.message || error.message
-        }`);
+        setError(
+          `There was a problem performing the action: ${
+            error.response?.data?.message || error.message
+          }`
+        );
       });
   };
 
@@ -377,7 +369,9 @@ function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManu
           onChange={changeCurrentState}
         >
           {availableStates.map((state) => (
-            <option key={state} value={state}>{state}</option>
+            <option key={state} value={state}>
+              {state}
+            </option>
           ))}
         </select>
       </div>
@@ -388,7 +382,9 @@ function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManu
           <option value="">Select an action...</option>
           {actionMapping[currentState] && actionMapping[currentState].length > 0 ? (
             actionMapping[currentState].map((act) => (
-              <option key={act} value={act}>{act}</option>
+              <option key={act} value={act}>
+                {act}
+              </option>
             ))
           ) : (
             <option value="">No actions available</option>
@@ -398,7 +394,11 @@ function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManu
 
       {(action === 'ARF' || action === 'DRF') && (
         <div className="form-group">
-          <label htmlFor="referee">{action === 'ARF' ? 'Referee Email to Add' : 'Referee Email to Remove'}</label>
+          <label htmlFor="referee">
+            {action === 'ARF'
+              ? 'Referee Email to Add'
+              : 'Referee Email to Remove'}
+          </label>
           <input
             type="email"
             id="referee"
@@ -409,8 +409,12 @@ function ManuscriptActionForm({ visible, cancel, setError, manuscriptId, setManu
       )}
 
       <div className="form-buttons">
-        <button type="button" onClick={cancel}>Cancel</button>
-        <button type="submit" onClick={submitAction}>Submit Action</button>
+        <button type="button" onClick={cancel}>
+          Cancel
+        </button>
+        <button type="submit" onClick={submitAction}>
+          Submit Action
+        </button>
       </div>
     </form>
   );
@@ -421,7 +425,7 @@ ManuscriptActionForm.propTypes = {
   cancel: propTypes.func.isRequired,
   setError: propTypes.func.isRequired,
   manuscriptId: propTypes.string.isRequired,
-  setManuscriptId: propTypes.func.isRequired,
+  setManuscriptId: propTypes.func.isRequired
 };
 
 function Dashboard() {
@@ -434,20 +438,18 @@ function Dashboard() {
   const [isAuthor, setIsAuthor] = useState(false);
   const [authorNames, setAuthorNames] = useState({});
   const [stateNames, setStateNames] = useState({});
-  const [viewMode, setViewMode] = useState('default'); // 'default', 'sorted', or state code
+  const [viewMode, setViewMode] = useState('default');
   const [validStates, setValidStates] = useState([]);
   const [validStateOptions, setValidStateOptions] = useState([]);
 
   const fetchManuscripts = () => {
     if (!isAuthorized && !isAuthor) return;
-    
+
     let endpoint;
-    
-    // If user is an author but not an editor, always use author endpoint
+
     if (isAuthor && !isAuthorized && user?.email) {
       endpoint = AUTHOR_MANUSCRIPTS_ENDPOINT(user.email);
     } else {
-      // For editors or combined roles, use the selected view mode
       switch (viewMode) {
         case 'sorted':
           endpoint = SORTED_MANUSCRIPTS_ENDPOINT;
@@ -456,7 +458,6 @@ function Dashboard() {
           endpoint = FETCH_MANUSCRIPT_ENDPOINT;
           break;
         default:
-          // If viewMode is a state code
           if (validStates.includes(viewMode)) {
             endpoint = MANUSCRIPTS_BY_STATE_ENDPOINT(viewMode);
           } else {
@@ -464,7 +465,7 @@ function Dashboard() {
           }
       }
     }
-    
+
     axios
       .get(endpoint, axiosConfig)
       .then(({ data }) => {
@@ -477,11 +478,10 @@ function Dashboard() {
       .catch((err) => {
         console.error(`Error fetching manuscripts (${viewMode}):`, err);
         setError(`Failed to retrieve manuscripts: ${err.message}`);
-        // If there's an error with a filtered view, fall back to default view
         if (viewMode !== 'default') {
           setViewMode('default');
-          // Retry with default endpoint
-          axios.get(FETCH_MANUSCRIPT_ENDPOINT, axiosConfig)
+          axios
+            .get(FETCH_MANUSCRIPT_ENDPOINT, axiosConfig)
             .then(({ data }) => {
               const manuscriptsArray = Array.isArray(data) ? data : [data];
               setManuscripts(manuscriptsArray);
@@ -494,20 +494,15 @@ function Dashboard() {
       });
   };
 
-  // Fetch state names from backend
   useEffect(() => {
     axios
       .get(STATE_NAMES_ENDPOINT, axiosConfig)
       .then(({ data }) => {
-        console.log('State names API response:', data, 'Type:', Array.isArray(data) ? 'Array' : typeof data);
-        // Ensure stateNames is an object, not an array
         if (data && typeof data === 'object') {
-          // If it's an array, convert it to an object
           if (Array.isArray(data)) {
-            console.warn('State names received as array, converting to object');
             const stateNamesObj = {};
             const stateCodesList = [];
-            data.forEach(item => {
+            data.forEach((item) => {
               if (item && item.code && item.name) {
                 stateNamesObj[item.code] = item.name;
                 stateCodesList.push(item.code);
@@ -516,34 +511,29 @@ function Dashboard() {
             setStateNames(stateNamesObj);
             setValidStates(stateCodesList);
           } else {
-            // It's already an object
             setStateNames(data);
             setValidStates(Object.keys(data));
           }
         } else {
           console.error('Invalid state names data received:', data);
-          setStateNames({}); // Set to empty object as fallback
+          setStateNames({});
           setValidStates([]);
         }
       })
       .catch((err) => {
         console.error('Error fetching state names:', err);
         setError(`Failed to retrieve state names: ${err.message}`);
-        setStateNames({}); // Set to empty object on error
+        setStateNames({});
       });
   }, []);
-  
-  // Fetch valid states with their display names
+
   useEffect(() => {
     axios
       .get(VALID_STATES_ENDPOINT, axiosConfig)
       .then(({ data }) => {
-        console.log('Valid states API response:', data);
         if (Array.isArray(data)) {
-          // Extract state codes for filtering
-          const stateCodes = data.map(state => state.code);
+          const stateCodes = data.map((state) => state.code);
           setValidStates(stateCodes);
-          // Save the full state objects with code and name for the dropdown
           setValidStateOptions(data);
         } else {
           console.error('Invalid valid states data received:', data);
@@ -556,46 +546,36 @@ function Dashboard() {
       });
   }, []);
 
-  // Check user authorization on mount
   useEffect(() => {
-    // Check if user is an editor
     if (user && isEditor()) {
       setIsAuthorized(true);
       setError('');
     } else {
       setIsAuthorized(false);
     }
-    
-    // Check if user is an author (has email)
+
     if (user && user.email) {
       setIsAuthor(true);
       setError('');
     } else {
       setIsAuthor(false);
     }
-    
-    // If user is neither an editor nor an author, show error
+
     if (!user || (!isEditor() && !user.email)) {
       setError('Please log in to view manuscripts.');
     }
   }, [user, isEditor]);
 
-  // Fetch manuscripts when authorized or author status changes or viewMode changes
   useEffect(() => {
     if (isAuthorized || isAuthor) {
       fetchManuscripts();
     }
   }, [isAuthorized, isAuthor, viewMode]);
 
-  // Fetch author names for all manuscripts
   useEffect(() => {
     if (manuscripts.length > 0) {
-      // Create a set of unique author emails
-      const uniqueAuthors = [...new Set(manuscripts.map(m => m.author))];
-      
-      // Fetch names for all unique authors that look like emails
-      uniqueAuthors.forEach(authorEmail => {
-        // Simple email validation
+      const uniqueAuthors = [...new Set(manuscripts.map((m) => m.author))];
+      uniqueAuthors.forEach((authorEmail) => {
         if (authorEmail && authorEmail.includes('@')) {
           fetchAuthorName(authorEmail);
         }
@@ -603,32 +583,25 @@ function Dashboard() {
     }
   }, [manuscripts]);
 
-  // Function to fetch author name from email
   const fetchAuthorName = (email) => {
-    // Skip if we already have this author's name or it's not an email
     if (authorNames[email] || !email.includes('@')) return;
-    
+
     axios
       .get(PEOPLE_NAME_ENDPOINT(email), axiosConfig)
-      .then(response => {
+      .then((response) => {
         if (response.data && response.data.name) {
-          setAuthorNames(prev => ({
+          setAuthorNames((prev) => ({
             ...prev,
             [email]: response.data.name
           }));
         }
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(`Error fetching name for ${email}:`, error);
-        // Don't set an error message as this is a non-critical feature
       });
   };
 
-
-
-  const toggleCreateForm = () => {
-    setShowCreateForm(!showCreateForm);
-  };
+  const toggleCreateForm = () => setShowCreateForm((s) => !s);
 
   const handleManuscriptCreated = () => {
     setError('');
@@ -636,27 +609,27 @@ function Dashboard() {
     fetchManuscripts();
   };
 
-  const handleEdit = (manuscript) => {
-    setEditingManuscript(manuscript);
-  };
+  const handleEdit = (manuscript) => setEditingManuscript(manuscript);
 
   const handleDelete = (manuscript) => {
-    if (window.confirm(`Are you sure you want to delete manuscript ID ${manuscript.manu_id}?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to delete manuscript ID ${manuscript.manu_id}?`
+      )
+    ) {
       axios
         .delete(DELETE_MANUSCRIPT_ENDPOINT(manuscript.manu_id), axiosConfig)
-        .then((response) => {
-          console.log('Manuscript deleted:', response.data);
-          fetchManuscripts();
-        })
-        .catch((error) => {
-          setError(`Error deleting manuscript: ${error.response?.data?.message || error.message}`);
-        });
+        .then(() => fetchManuscripts())
+        .catch((error) =>
+          setError(
+            `Error deleting manuscript: ${error.response?.data?.message ||
+              error.message}`
+          )
+        );
     }
   };
 
-  const cancelEdit = () => {
-    setEditingManuscript(null);
-  };
+  const cancelEdit = () => setEditingManuscript(null);
 
   return (
     <div className="dashboard-container">
@@ -666,7 +639,9 @@ function Dashboard() {
           {error}
           {!localStorage.getItem('user') && (
             <p>
-              <Link to="/login" className="login-link">Click here to log in</Link>
+              <Link to="/login" className="login-link">
+                Click here to log in
+              </Link>
             </p>
           )}
         </div>
@@ -698,35 +673,34 @@ function Dashboard() {
         />
       )}
 
-      {/* View controls - only for editors */}
       {isAuthorized && (
         <div className="view-controls">
           <h3>View Options</h3>
           <div className="view-buttons">
-            <button 
+            <button
               className={viewMode === 'default' ? 'active' : ''}
               onClick={() => setViewMode('default')}
             >
               Default Order
             </button>
-            <button 
+            <button
               className={viewMode === 'sorted' ? 'active' : ''}
               onClick={() => setViewMode('sorted')}
             >
               Sort by State
             </button>
           </div>
-          
+
           {validStateOptions.length > 0 && (
             <div className="filter-controls">
               <label htmlFor="stateFilter">Filter by State:</label>
-              <select 
-                id="stateFilter" 
+              <select
+                id="stateFilter"
                 value={validStates.includes(viewMode) ? viewMode : ''}
                 onChange={(e) => setViewMode(e.target.value || 'default')}
               >
                 <option value="">-- Select State --</option>
-                {validStateOptions.map(state => (
+                {validStateOptions.map((state) => (
                   <option key={state.code} value={state.code}>
                     {state.name}
                   </option>
@@ -736,8 +710,7 @@ function Dashboard() {
           )}
         </div>
       )}
-      
-      {/* Manuscripts list - for both editors and authors */}
+
       {(isAuthorized || isAuthor) && (
         <>
           {manuscripts.length > 0 ? (
@@ -764,13 +737,18 @@ function Dashboard() {
                       <td>{manuscript.manu_id}</td>
                       <td>{manuscript.title}</td>
                       <td>
-                        {manuscript.author && manuscript.author.includes('@') && authorNames[manuscript.author] 
-                          ? authorNames[manuscript.author] 
+                        {manuscript.author &&
+                        manuscript.author.includes('@') &&
+                        authorNames[manuscript.author]
+                          ? authorNames[manuscript.author]
                           : manuscript.author}
                       </td>
                       <td>
-                        <span className={`state-badge state-${manuscript.curr_state?.toLowerCase()}`}>
-                          {stateNames[manuscript.curr_state] || manuscript.curr_state}
+                        <span
+                          className={`state-badge state-${manuscript.curr_state?.toLowerCase()}`}
+                        >
+                          {stateNames[manuscript.curr_state] ||
+                            manuscript.curr_state}
                         </span>
                       </td>
                       {isAuthorized && (

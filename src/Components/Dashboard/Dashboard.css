@@ -32,7 +32,7 @@
 }
 
 .dashboard-buttons button {
-  background: linear-gradient(90deg,#6a11cb,#4361ee);
+  background: linear-gradient(90deg, #6a11cb, #4361ee);
   color: #fff;
   border: none;
   border-radius: 32px;
@@ -40,12 +40,12 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform .2s ease, box-shadow .2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .dashboard-buttons button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(67,97,238,0.3);
+  box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -57,7 +57,7 @@
   padding: 1rem 1.5rem;
   margin: 0 auto 2rem;
   max-width: 1000px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .view-controls h3 {
@@ -80,7 +80,7 @@
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background .2s ease, color .2s ease;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .view-buttons button.active {
@@ -112,7 +112,7 @@
   border: 1px solid #dde1ec;
   background: #fff;
   cursor: pointer;
-  transition: border-color .2s ease;
+  transition: border-color 0.2s ease;
 }
 
 .filter-controls select:hover,
@@ -141,13 +141,14 @@
   border-spacing: 0;
   overflow: hidden;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .manuscripts-table thead {
-  background: linear-gradient(90deg,#6a11cb,#4361ee);
+  background: linear-gradient(90deg, #6a11cb, #4361ee);
   position: sticky;
   top: 0;
+  z-index: 1;
 }
 
 .manuscripts-table th,
@@ -164,12 +165,12 @@
 
 .manuscripts-table tbody tr {
   background: #fff;
-  transition: transform .15s ease, box-shadow .15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .manuscripts-table tbody tr:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 /* remove bottom border on last row */
@@ -196,13 +197,27 @@
   letter-spacing: 0.5px;
 }
 
-.state-sub { background: #28a745; }
-.state-rev { background: #ffc107; }
-.state-aur { background: #17a2b8; }
-.state-ced { background: #6f42c1; }
-.state-pub { background: #007bff; }
-.state-rej { background: #dc3545; }
-.state-wit { background: #6c757d; }
+.state-sub {
+  background: #28a745;
+}
+.state-rev {
+  background: #ffc107;
+}
+.state-aur {
+  background: #17a2b8;
+}
+.state-ced {
+  background: #6f42c1;
+}
+.state-pub {
+  background: #007bff;
+}
+.state-rej {
+  background: #dc3545;
+}
+.state-wit {
+  background: #6c757d;
+}
 
 /* ─────────────────────────────────────────────────────────────────────────────
    6) Action buttons
@@ -223,8 +238,8 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: background .2s ease, transform .2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .action-buttons button:hover {
