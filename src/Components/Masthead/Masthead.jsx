@@ -9,36 +9,38 @@ function Masthead() {
   useEffect(() => {
     const fetchMasthead = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/people/masthead`);
-        if (response.data && response.data.Masthead) {
-          setMasthead(response.data.Masthead);
-        }
-      } catch (error) {
-        console.error('Error fetching masthead:', error);
+        const { data } = await axios.get(`${BACKEND_URL}/people/masthead`);
+        if (data?.Masthead) setMasthead(data.Masthead);
+      } catch (err) {
+        console.error("Error fetching masthead:", err);
       }
     };
     fetchMasthead();
   }, []);
 
   return (
-    <div className="masthead-container upgraded">
+    <div className="masthead-container">
       <div className="masthead-hero">
-        <h1>Our Team</h1>
+        <h1 className="masthead-title">Our Team</h1>
         <p className="masthead-sub">Meet the people behind the mission</p>
       </div>
 
-      <div className="masthead-content">
+      <div className="masthead-grid">
         {Object.entries(masthead).map(([role, people]) => (
-          <div key={role} className="role-group">
-            <h2>{role}</h2>
-            <ul>
-              {people.map((person, index) => (
-                <li key={index} className="person-entry">
-                  <span className="person-name">{person.name}</span>
-                  <a href={`mailto:${person.email}`} className="person-email">{person.email}</a>
-                </li>
-              ))}
-            </ul>
+          <div key={role} className="role-card">
+            <div className="role-card-header">{role}</div>
+            <div className="role-card-body">
+              <ul className="person-list">
+                {people.map((person, i) => (
+                  <li key={i} className="person-entry">
+                    <span className="person-name">{person.name}</span>
+                    <a href={`mailto:${person.email}`} className="person-email">
+                      {person.email}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         ))}
       </div>

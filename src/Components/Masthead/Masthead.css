@@ -1,62 +1,109 @@
-.masthead-container.upgraded {
-  max-width: 900px;
+/* 1) Font & core */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+.masthead-container {
+  font-family: 'Inter', sans-serif;
+  max-width: 1200px;
   margin: 3rem auto;
-  padding: 1rem;
+  padding: 0 1rem;
+  color: #333;
 }
 
+/* 2) Hero section */
 .masthead-hero {
   text-align: center;
   margin-bottom: 2.5rem;
 }
-
-.masthead-hero h1 {
-  font-size: 2.8rem;
-  color: #3d5afe;
+.masthead-title {
+  font-size: 3rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #6a11cb, #4361ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   margin-bottom: 0.5rem;
 }
-
 .masthead-sub {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   color: #555;
 }
 
-.masthead-content {
-  background-color: #ffffff;
+/* 3) Grid of role-cards */
+.masthead-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* 4) Individual card */
+.role-card {
+  background: #fff;
   border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.role-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
 }
 
-.role-group {
-  margin-bottom: 2rem;
+/* 5) Card header with gradient */
+.role-card-header {
+  background: linear-gradient(135deg, #6a11cb, #4361ee);
+  color: #fff;
+  padding: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.role-group h2 {
-  color: #1a1a2e;
-  font-size: 1.6rem;
-  margin-bottom: 1rem;
-  border-left: 4px solid #3d5afe;
-  padding-left: 0.75rem;
+/* 6) Card body & list */
+.role-card-body {
+  padding: 1rem;
+  flex: 1;
 }
-
+.person-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
 .person-entry {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0;
-  border-bottom: 1px dashed #e0e0e0;
+  border-bottom: 1px solid #eee;
+  transition: background .2s ease;
+}
+.person-entry:last-child {
+  border-bottom: none;
+}
+.person-entry:hover {
+  background: #f7f8fc;
 }
 
+/* 7) Text styles */
 .person-name {
   font-weight: 600;
-  color: #333;
 }
-
 .person-email {
-  color: #3d5afe;
+  color: #4361ee;
   text-decoration: none;
+  font-size: 0.9rem;
 }
-
 .person-email:hover {
   text-decoration: underline;
+}
+
+/* 8) Responsive tweaks */
+@media (max-width: 600px) {
+  .masthead-title {
+    font-size: 2.4rem;
+  }
+  .masthead-grid {
+    grid-template-columns: 1fr;
+  }
 }
